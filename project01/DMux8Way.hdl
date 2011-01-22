@@ -15,6 +15,40 @@ CHIP DMux8Way {
     OUT a, b, c, d, e, f, g, h;
 
     PARTS:
-    // Implementation missing.
-}
+    Not(in=sel[0], out=notrightsel);
+    Not(in=sel[1], out=notmidsel);
+    Not(in=sel[2], out=notleftsel);
 
+    And(a=notrightsel, b=notmidsel, out=partialasel);
+    And(a=partialasel, b=notleftsel, out=asel);
+
+    And(a=sel[0], b=notmidsel, out=partialbsel);
+    And(a=partialbsel, b=notleftsel, out=bsel); 
+
+    And(a=notrightsel, b=sel[1], out=partialcsel);
+    And(a=partialcsel, b=notleftsel, out=csel); 
+
+    And(a=sel[0], b=sel[1], out=partialdsel);
+    And(a=partialdsel, b=notleftsel, out=dsel); 
+
+    And(a=notrightsel, b=notmidsel, out=partialesel);
+    And(a=partialesel, b=sel[2], out=esel); 
+
+    And(a=sel[0], b=notmidsel, out=partialfsel);
+    And(a=partialfsel, b=sel[2], out=fsel); 
+
+    And(a=notrightsel, b=sel[1], out=partialgsel);
+    And(a=partialgsel, b=sel[2], out=gsel); 
+
+    And(a=sel[0], b=sel[1], out=partialhsel);
+    And(a=partialhsel, b=sel[2], out=hsel);
+
+    And(a=in, b=asel, out=a);
+    And(a=in, b=bsel, out=b);
+    And(a=in, b=csel, out=c);
+    And(a=in, b=dsel, out=d);
+    And(a=in, b=esel, out=e);
+    And(a=in, b=fsel, out=f);
+    And(a=in, b=gsel, out=g);
+    And(a=in, b=hsel, out=h);
+}
