@@ -17,5 +17,26 @@ CHIP Mux4Way16 {
     OUT out[16];
 
     PARTS:
-    // Implementation missing.
+    Not(in=sel[0], out=notrightsel);
+    Not(in=sel[1], out=notleftsel);
+
+    Mux16(a=a, b=false, sel=sel[0], out=righta);
+    Mux16(a=a, b=false, sel=sel[1], out=lefta);
+    And16(a=righta, b=lefta, out=muxeda);
+
+    Mux16(a=b, b=false, sel=notrightsel, out=rightb);
+    Mux16(a=b, b=false, sel=sel[1], out=leftb);
+    And16(a=rightb, b=leftb, out=muxedb);
+
+    Mux16(a=c, b=false, sel=sel[0], out=rightc);
+    Mux16(a=c, b=false, sel=notleftsel, out=leftc);
+    And16(a=rightc, b=leftc, out=muxedc);
+
+    Mux16(a=d, b=false, sel=notrightsel, out=rightd);
+    Mux16(a=d, b=false, sel=notleftsel, out=leftd);
+    And16(a=rightd, b=leftd, out=muxedd);
+
+    Or16(a=muxeda, b=muxedb, out=firstor);
+    Or16(a=muxedc, b=firstor, out=secondor);
+    Or16(a=muxedd, b=secondor, out=out);
 }
