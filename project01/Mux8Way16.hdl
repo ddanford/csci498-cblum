@@ -20,5 +20,63 @@ CHIP Mux8Way16 {
     OUT out[16];
 
     PARTS: 
-   // Implementation missing.
+    Not(in=sel[0], out=notrightsel);
+    Not(in=sel[1], out=notmidsel);
+    Not(in=sel[2], out=notleftsel);
+
+    Mux16(a=a, b=false, sel=sel[0], out=righta);
+    Mux16(a=a, b=false, sel=sel[1], out=mida);
+    Mux16(a=a, b=false, sel=sel[2], out=lefta);
+    And16(a=righta, b=mida, out=rightmida);
+    And16(a=rightmida, b=lefta, out=muxeda);
+
+    Mux16(a=b, b=false, sel=notrightsel, out=rightb);
+    Mux16(a=b, b=false, sel=sel[1], out=midb);
+    Mux16(a=b, b=false, sel=sel[2], out=leftb);
+    And16(a=rightb, b=midb, out=rightmidb);
+    And16(a=rightmidb, b=leftb, out=muxedb);
+
+    Mux16(a=c, b=false, sel=sel[0], out=rightc);
+    Mux16(a=c, b=false, sel=notmidsel, out=midc);
+    Mux16(a=c, b=false, sel=sel[2], out=leftc);
+    And16(a=rightc, b=midc, out=rightmidc);
+    And16(a=rightmidc, b=leftc, out=muxedc);
+
+    Mux16(a=d, b=false, sel=notrightsel, out=rightd);
+    Mux16(a=d, b=false, sel=notmidsel, out=midd);
+    Mux16(a=d, b=false, sel=sel[2], out=leftd);
+    And16(a=rightd, b=midd, out=rightmidd);
+    And16(a=rightmidd, b=leftd, out=muxedd);
+
+    Mux16(a=e, b=false, sel=sel[0], out=righte);
+    Mux16(a=e, b=false, sel=sel[1], out=mide);
+    Mux16(a=e, b=false, sel=notleftsel, out=lefte);
+    And16(a=righte, b=mide, out=rightmide);
+    And16(a=rightmide, b=lefte, out=muxede);
+
+    Mux16(a=f, b=false, sel=notrightsel, out=rightf);
+    Mux16(a=f, b=false, sel=sel[1], out=midf);
+    Mux16(a=f, b=false, sel=notleftsel, out=leftf);
+    And16(a=rightf, b=midf, out=rightmidf);
+    And16(a=rightmidf, b=leftf, out=muxedf);
+
+    Mux16(a=g, b=false, sel=sel[0], out=rightg);
+    Mux16(a=g, b=false, sel=notmidsel, out=midg);
+    Mux16(a=g, b=false, sel=notleftsel, out=leftg);
+    And16(a=rightg, b=midg, out=rightmidg);
+    And16(a=rightmidg, b=leftg, out=muxedg);
+
+    Mux16(a=h, b=false, sel=notrightsel, out=righth);
+    Mux16(a=h, b=false, sel=notmidsel, out=midh);
+    Mux16(a=h, b=false, sel=notleftsel, out=lefth);
+    And16(a=righth, b=midh, out=rightmidh);
+    And16(a=rightmidh, b=lefth, out=muxedh);
+
+    Or16(a=muxeda, b=muxedb, out=firstor);
+    Or16(a=muxedc, b=firstor, out=secondor);
+    Or16(a=muxedd, b=secondor, out=thirdor);
+    Or16(a=muxede, b=thirdor, out=fourthor);
+    Or16(a=muxedf, b=fourthor, out=fifthor);
+    Or16(a=muxedg, b=fifthor, out=sixthor);
+    Or16(a=muxedh, b=sixthor, out=out);
 }
