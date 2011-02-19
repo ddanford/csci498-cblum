@@ -39,6 +39,37 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Implementation missing.
+    PC(in=AOut, load=jumpBit, inc=true, reset=reset, out[0..14]=pc);
+
+	Mux16(a=instruction, b=ALUOut, sel=instruction[15], out=insOrALU);
+	Not(in=instruction[15], out=notmsb);
+	Or(a=notmsb, b=instruction[5], out=loadA);
+	And(a=instruction[15], b=instruction[4], out=loadD);
+	And(a=instruction[15], b=instruction[3], out=writeM);
+	
+	ARegister(in=insOrALU, load=loadA, out=AOut, out[0..14]=addressM);
+	DRegister(in=ALUOut, load=loadD, out=DOut);
+	
+	Mux16(a=AOut, b=inM, sel=instruction[12], out=AOrM);
+	
+    ALU(x=DOut, y=AOrM, zx=instruction[11], nx=instruction[10], 
+		zy=instruction[9], ny=instruction[8], f=instruction[7], 
+		no=instruction[6], zr=iszero, ng=isneg, out=outM, out=ALUOut);
+	
+	Not(in=iszero, out=notiszero);
+	Not(in=isneg, out=notisneg);
+	
+	And(a=instruction[15], b=instruction[0], out=checkgt);
+	And(a=checkgt, b=notisneg, out=checkgtneg);
+	And(a=checkgtneg, b=notiszero, out=gt);
+	
+	And(a=instruction[15], b=instruction[1], out=checkeq);
+	And(a=checkeq, b=iszero, out=eq);
+	
+	And(a=instruction[15], b=instruction[2], out=checklt);
+	And(a=checklt, b=isneg, out=lt);
+	
+	Or(a=gt, b=lt, out=gtorlt);
+	Or(a=gtorlt, b=eq, out=jumpBit);
 }
 
