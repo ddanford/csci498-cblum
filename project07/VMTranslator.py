@@ -37,9 +37,13 @@ def doTheThing ( vmfile, asmfile ):
 		if (commandtype == 'C_ARITHMATIC'):
 			writeArithmetic( asmfile, vmcommands[commandcounter] )
 		if (commandtype == 'C_PUSH'):
-			writePushPop( asmfile, vmcommands[commandcounter].split()[0], arg1 (vmcommands[commandcounter]), arg2 (vmcommands[commandcounter]))
+			writePushPop( asmfile, vmcommands[commandcounter].split()[0], 
+			arg1 (vmcommands[commandcounter]), 
+			arg2 (vmcommands[commandcounter]))
 		if (commandtype == 'C_POP'):
-			writePushPop( asmfile, vmcommands[commandcounter].split()[0], arg1 (vmcommands[commandcounter]), arg2 (vmcommands[commandcounter]))
+			writePushPop( asmfile, vmcommands[commandcounter].split()[0], 
+			arg1 (vmcommands[commandcounter]), 
+			arg2 (vmcommands[commandcounter]))
 		commandcounter = advance( commandcounter )
 
 # Checks to see if there are more commands to be assembled in the .vm file
@@ -82,10 +86,38 @@ def arg2 ( codeline ):
 
 #Writes out the asm code for each of the arithmatic commands.
 def writeArithmetic ( asmfile, command ):
+	global labelcounter
 	if (command.strip() == "add"):
 		asmfile.write("//add\n@SP\nAM=M-1\nD=M\n@SP\nA=M-1\nM=M+D\n")
 	if (command.strip() == "sub"):
-		asmfile.write("//add\n@SP\nAM=M-1\nD=M\nA=M-1\nM=M-D\n")
+		asmfile.write("//sub\n@SP\nAM=M-1\nD=M\n@SP\nA=M-1\nM=M-D\n")
+	if (command.strip() == "neg"):
+		asmfile.write("//neg\n@SP\nA=M-1\nM=-M\n")
+	if (command.strip() == "eq"):
+		asmfile.write("//eq\n@SP\nAM=M-1\nD=M\n@SP\nA=M-1\nD=D-M\n@equals"
+		+str(labelcounter)+"\nD;JEQ\n@SP\nA=M-1\nM=0\n@end"
+		+str(labelcounter)+"\n0;JMP\n(equals"
+		+str(labelcounter)+")\n@SP\nA=M-1\nM=-1\n(end"
+		+str(labelcounter)+")\n")
+	if (command.strip() == "gt"):
+		asmfile.write("//gt\n@SP\nAM=M-1\nD=M\n@SP\nA=M-1\nD=M-D\n@greaterthan"
+		+str(labelcounter)+"\nD;JGT\n@SP\nA=M-1\nM=0\n@end"
+		+str(labelcounter)+"\n0;JMP\n(greaterthan"
+		+str(labelcounter)+")\n@SP\nA=M-1\nM=-1\n(end"
+		+str(labelcounter)+")\n")
+	if (command.strip() == "lt"):
+		asmfile.write("//lt\n@SP\nAM=M-1\nD=M\n@SP\nA=M-1\nD=M-D\n@lessthan"
+		+str(labelcounter)+"\nD;JLT\n@SP\nA=M-1\nM=0\n@end"
+		+str(labelcounter)+"\n0;JMP\n(lessthan"
+		+str(labelcounter)+")\n@SP\nA=M-1\nM=-1\n(end"
+		+str(labelcounter)+")\n")
+	if (command.strip() == "and"):
+		asmfile.write("//and\n@SP\nAM=M-1\nD=M\n@SP\nA=M-1\nM=D&M\n")
+	if (command.strip() == "or"):
+		asmfile.write("//or\n@SP\nAM=M-1\nD=M\n@SP\nA=M-1\nM=D|M\n")
+	if (command.strip() == "not"):
+		asmfile.write("//not\n@SP\nA=M-1\nM=!M\n")
+	labelcounter = advance ( labelcounter )
 
 #Writes out the asm code for push and pop commands
 def writePushPop ( asmfile, command, segment, index ):
@@ -100,4 +132,5 @@ if len(sys.argv) != 2:
 	
 filepath = sys.argv[1]
 
+labelcounter = 0
 initializer (filepath)
