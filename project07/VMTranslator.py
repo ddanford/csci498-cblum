@@ -3,11 +3,41 @@ import os
 
 # PARSER MODULE
 
-def initializer ( filename ):
+def initializer ( filepath ):
 
 	if (os.path.isdir(filepath)):
-		print('Wanna see me comb my hair really fast?')
-		quit()
+		for subdirs, dirs, files in os.walk(filepath):
+			if filepath.endswith("/"):
+				try:
+					asmfile = open(filepath[0:len(filepath)-1]+".asm", 'w')
+				except:
+					print("Could not open input file: " + filepath[0:len(filepath)-1] +".asm")
+					quit()
+			elif filepath.endswith("\\"):
+				filepath = filepath.replace("\\", "/")
+				try:
+					asmfile = open(filepath[0:len(filepath)-1]+".asm", 'w')
+				except:
+					print("Could not open input file: " + filepath[0:len(filepath)-1] +".asm")
+					quit()
+			else:
+				try:
+					asmfile = open(filepath+".asm", 'w')
+					filepath = filepath+"/"
+				except:
+					print("Could not open input file: " + filepath +".asm")
+					quit()
+			for inpath in files:
+				if (inpath.partition('.vm')[1] == '.vm'):
+					try:
+						vmfile = open(filepath+inpath, 'r')
+					except:
+						print("Could not open input file: " + filepath)
+						quit()
+					asmfile.write("//Translating "+inpath+"\n")
+					doTheThing ( vmfile, asmfile )
+		vmfile.close()
+		asmfile.close()
 	else:
 		if (filepath.partition('.vm')[1] != '.vm'):
 			print('Invalid file. Must be a .vm file')
