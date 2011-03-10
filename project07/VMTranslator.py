@@ -121,9 +121,30 @@ def writeArithmetic ( asmfile, command ):
 
 #Writes out the asm code for push and pop commands
 def writePushPop ( asmfile, command, segment, index ):
-	if ( command == "push"):
+	if ( command == "push" ):
 		if ( segment == "constant" ):
-			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")	
+			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+		if ( segment == "local" ):
+			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@LCL\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+		if ( segment == "argument" ):
+			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@ARG\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+		if ( segment == "this"):
+			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@THIS\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+		if ( segment == "that"):
+			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@THAT\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+		if ( segment == "temp"):
+			asmfile.write("//push "+segment+" "+index+"\n@"+str(5+int(index))+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+	if ( command == "pop" ):
+		if ( segment == "local" ):
+			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@LCL\nD=D+M\n@CRAZYADDRESSINEED\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
+		if ( segment == "argument" ):
+			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@ARG\nD=D+M\n@CRAZYADDRESSINEED\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
+		if ( segment == "this" ):
+			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@THIS\nD=D+M\n@CRAZYADDRESSINEED\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
+		if ( segment == "that" ):
+			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@THAT\nD=D+M\n@CRAZYADDRESSINEED\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
+		if ( segment == "temp" ):
+			asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@R"+str(5+int(index))+"\nM=D\n@SP\nM=M-1\n")
 			
 #MAIN Starts the Translator
 if len(sys.argv) != 2:
