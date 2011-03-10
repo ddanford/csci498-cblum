@@ -128,23 +128,45 @@ def writePushPop ( asmfile, command, segment, index ):
 			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@LCL\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
 		if ( segment == "argument" ):
 			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@ARG\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
-		if ( segment == "this"):
+		if ( segment == "this" ):
 			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@THIS\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
-		if ( segment == "that"):
+		if ( segment == "that" ):
 			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@THAT\nA=D+M\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
-		if ( segment == "temp"):
+		if ( segment == "temp" ):
 			asmfile.write("//push "+segment+" "+index+"\n@"+str(5+int(index))+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+		if ( segment == "pointer" ):
+			if ( index == "0" ):
+				asmfile.write("//push "+segment+" "+index+"\n@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+			if ( index == "1" ):
+				asmfile.write("//push "+segment+" "+index+"\n@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+		if ( segment == "static" ):
+			asmfile.write("//push "+segment+" "+index+"\n@"
+			+asmfile.name.split('/')[len(asmfile.name.split('/'))-1].partition('.')[0]+index
+			+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
 	if ( command == "pop" ):
 		if ( segment == "local" ):
-			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@LCL\nD=D+M\n@CRAZYADDRESSINEED\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
+			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@LCL\nD=D+M\n@CRAZYADDRESSINEED"
+			+"\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
 		if ( segment == "argument" ):
-			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@ARG\nD=D+M\n@CRAZYADDRESSINEED\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
+			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@ARG\nD=D+M\n@CRAZYADDRESSINEED"
+			+"\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
 		if ( segment == "this" ):
-			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@THIS\nD=D+M\n@CRAZYADDRESSINEED\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
+			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@THIS\nD=D+M\n@CRAZYADDRESSINEED"
+			+"\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
 		if ( segment == "that" ):
-			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@THAT\nD=D+M\n@CRAZYADDRESSINEED\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
+			asmfile.write("//pop "+segment+" "+index+"\n@"+index+"\nD=A\n@THAT\nD=D+M\n@CRAZYADDRESSINEED"
+			+"\nM=D\n@SP\nA=M-1\nD=M\n@CRAZYADDRESSINEED\nA=M\nM=D\n@SP\nM=M-1\n")
 		if ( segment == "temp" ):
 			asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@R"+str(5+int(index))+"\nM=D\n@SP\nM=M-1\n")
+		if ( segment == "pointer"):
+			if ( index == "0" ):
+				asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@THIS\nM=D\n@SP\nM=M-1\n")
+			if ( index == "1" ):
+				asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@THAT\nM=D\n@SP\nM=M-1\n")
+		if ( segment == "static" ):
+			asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@"
+			+(asmfile.name.split('/')[len(asmfile.name.split('/'))-1].partition('.')[0]+index)
+			+"\nM=D\n@SP\nM=M-1\n")
 			
 #MAIN Starts the Translator
 if len(sys.argv) != 2:
