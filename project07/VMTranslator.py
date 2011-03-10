@@ -5,6 +5,7 @@ import os
 
 def initializer ( filepath ):
 
+	#Checks to see if the path given is a directory. If it is, it iterates through each file in the directory to see if it is a .vm file
 	if (os.path.isdir(filepath)):
 		for subdirs, dirs, files in os.walk(filepath):
 			if filepath.endswith("/"):
