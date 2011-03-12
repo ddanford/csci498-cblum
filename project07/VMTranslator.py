@@ -172,7 +172,7 @@ def writePushPop ( asmfile, command, segment, index ):
 				asmfile.write("//push "+segment+" "+index+"\n@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
 		if ( segment == "static" ):
 			asmfile.write("//push "+segment+" "+index+"\n@"
-			+asmfile.name.split('/')[len(asmfile.name.split('/'))-1].partition('.')[0]+index
+			+asmfile.name.split('/')[len(asmfile.name.split('/'))-1].partition('.')[0]+"."+index
 			+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
 	if ( command == "pop" ):
 		if ( segment == "local" ):
@@ -196,7 +196,7 @@ def writePushPop ( asmfile, command, segment, index ):
 				asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@THAT\nM=D\n@SP\nM=M-1\n")
 		if ( segment == "static" ):
 			asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@"
-			+(asmfile.name.split('/')[len(asmfile.name.split('/'))-1].partition('.')[0]+index)
+			+(asmfile.name.split('/')[len(asmfile.name.split('/'))-1].partition('.')[0]+"."+index)
 			+"\nM=D\n@SP\nM=M-1\n")
 			
 #MAIN Starts the Translator
