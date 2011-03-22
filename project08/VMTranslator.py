@@ -77,6 +77,12 @@ def doTheThing ( vmfile, asmfile ):
 			arg2 (vmcommands[commandcounter]))
 		if (commandtype == 'C_GOTO' or commandtype == 'C_IF' or commandtype == 'C_LABEL'):
 			writeIfGotoLabel( asmfile, vmcommands[commandcounter].split()[0], arg1 (vmcommands[commandcounter]) )
+		if (commandtype == 'C_FUNCTION'):
+			writeFunction( asmfile, vmcommands[commandcounter].split()[0],
+			arg1 (vmcommands[commandcounter]), 
+			arg2 (vmcommands[commandcounter]))
+		if (commandtype == 'C_RETURN'):
+			writeReturn( asmfile, vmcommands[commandcounter].split()[0] )
 		commandcounter = advance( commandcounter )
 
 # Checks to see if there are more commands to be assembled in the .vm file
@@ -109,6 +115,10 @@ def commandType ( codeline ):
 			return 'C_GOTO'
 		if (firstArg == 'if-goto'):
 			return 'C_IF'
+		if (firstArg == 'function'):
+			return 'C_FUNCTION'
+		if (firstArg == 'return'):
+			return 'C_RETURN'
 		return 'OTHER_STUFF'
 	except:
 		return 'OTHER_STUFF'
@@ -215,6 +225,19 @@ def writeIfGotoLabel ( asmfile, command, segment ):
 		asmfile.write("@"+current_function+"$"+segment+"\n0;JMP\n")
 	if (command == 'label'):
 		asmfile.write("("+current_function+"$"+segment+")\n")
+		
+def writeFunction ( asmfile, command, name, numOfArgs ):
+	global current_function
+	current_function = name
+	asmfile.write('//'+command+' '+name+' '+numOfArgs+'\n'
+	+'('+name+')\n')
+	for i in range(0, int(numOfArgs)):
+		asmfile.write("@0\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
+	
+def writeReturn ( asmfile, command ):
+	asmfile.write('//return\n@LCL\nD=M\n@FRAME\nM=D\n@5\nD=D-A\n@RET\nM=D\n@SP\nA=M-1\nD=M\n@ARG\nA=M\nM=D\n@ARG\nD=M\n@SP\nM=D+1\n'
+	+'@FRAME\nAM=M-1\nD=M\n@THAT\nM=D\n@FRAME\nAM=M-1\nD=M\n@THIS\nM=D\n@FRAME\nAM=M-1\nD=M\n@ARG\nM=D\n@FRAME\nAM=M-1\nD=M\n@LCL\nM=D\n'
+	+'@RET\nA=M\n0;JMP\n')
 			
 #MAIN Starts the Translator
 if len(sys.argv) != 2:
