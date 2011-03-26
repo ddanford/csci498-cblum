@@ -4,7 +4,7 @@ import os
 # PARSER MODULE
 
 def initializer ( filepath ):
-
+	global current_file
 	#Checks to see if the path given is a directory. If it is, it iterates through each file in the directory to see if it is a .vm file
 	if (os.path.isdir(filepath)):
 		for subdirs, dirs, files in os.walk(filepath):
@@ -29,9 +29,17 @@ def initializer ( filepath ):
 					print("Could not open input file: " + filepath +".asm")
 					quit()
 			for inpath in files:
+				if (inpath.partition('Sys.vm')[1] == 'Sys.vm'):
+					try:
+						asmfile.write('//Bootstrap\n@256\nD=A\n@SP\nM=D\n@5\nD=A\n@SP\nM=D+M\n@Sys.init\n0;JMP\n')
+					except:
+						print("Could not open input file: " + filepath)
+						quit()
+			for inpath in files:
 				if (inpath.partition('.vm')[1] == '.vm'):
 					try:
 						vmfile = open(filepath+inpath, 'r')
+						current_file = vmfile.name.split('/')[len(vmfile.name.split('/'))-1].partition('.')[0]
 					except:
 						print("Could not open input file: " + filepath)
 						quit()
@@ -83,6 +91,10 @@ def doTheThing ( vmfile, asmfile ):
 			arg2 (vmcommands[commandcounter]))
 		if (commandtype == 'C_RETURN'):
 			writeReturn( asmfile, vmcommands[commandcounter].split()[0] )
+		if (commandtype == 'C_CALL'):
+			writeCall ( asmfile, vmcommands[commandcounter].split()[0], 
+			arg1 (vmcommands[commandcounter]), 
+			arg2 (vmcommands[commandcounter]))
 		commandcounter = advance( commandcounter )
 
 # Checks to see if there are more commands to be assembled in the .vm file
@@ -119,6 +131,8 @@ def commandType ( codeline ):
 			return 'C_FUNCTION'
 		if (firstArg == 'return'):
 			return 'C_RETURN'
+		if (firstArg == 'call'):
+			return 'C_CALL'
 		return 'OTHER_STUFF'
 	except:
 		return 'OTHER_STUFF'
@@ -134,7 +148,8 @@ def arg2 ( codeline ):
 #CODEWRITER MODULE
 
 #Writes out the asm code for each of the arithmatic commands.
-def writeArithmetic ( asmfile, command ):
+def writeArithmetic ( asmfile, codeline ):
+	command = codeline.partition('//')[0].split()[0]
 	global labelcounter
 	if (command.strip() == "add"):
 		asmfile.write("//add\n@SP\nAM=M-1\nD=M\n@SP\nA=M-1\nM=M+D\n")
@@ -170,6 +185,7 @@ def writeArithmetic ( asmfile, command ):
 
 #Writes out the asm code for push and pop commands
 def writePushPop ( asmfile, command, segment, index ):
+	global current_file
 	if ( command == "push" ):
 		if ( segment == "constant" ):
 			asmfile.write("//push "+segment+" "+index+"\n@"+index+"\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
@@ -190,7 +206,7 @@ def writePushPop ( asmfile, command, segment, index ):
 				asmfile.write("//push "+segment+" "+index+"\n@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
 		if ( segment == "static" ):
 			asmfile.write("//push "+segment+" "+index+"\n@"
-			+asmfile.name.split('/')[len(asmfile.name.split('/'))-1].partition('.')[0]+"."+index
+			+current_file+"."+index
 			+"\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
 	if ( command == "pop" ):
 		if ( segment == "local" ):
@@ -214,7 +230,7 @@ def writePushPop ( asmfile, command, segment, index ):
 				asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@THAT\nM=D\n@SP\nM=M-1\n")
 		if ( segment == "static" ):
 			asmfile.write("//pop "+segment+" "+index+"\n@SP\nA=M-1\nD=M\n@"
-			+(asmfile.name.split('/')[len(asmfile.name.split('/'))-1].partition('.')[0]+"."+index)
+			+current_file+"."+index
 			+"\nM=D\n@SP\nM=M-1\n")
 			
 def writeIfGotoLabel ( asmfile, command, segment ):
@@ -235,9 +251,27 @@ def writeFunction ( asmfile, command, name, numOfArgs ):
 		asmfile.write("@0\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n")
 	
 def writeReturn ( asmfile, command ):
-	asmfile.write('//return\n@LCL\nD=M\n@FRAME\nM=D\n@5\nD=D-A\n@RET\nM=D\n@SP\nA=M-1\nD=M\n@ARG\nA=M\nM=D\n@ARG\nD=M\n@SP\nM=D+1\n'
+	asmfile.write('//return\n@LCL\nD=M\n@FRAME\nM=D\n@5\nA=D-A\nD=M\n@RET\nM=D\n@SP\nA=M-1\nD=M\n@ARG\nA=M\nM=D\n@ARG\nD=M\n@SP\nM=D+1\n'
 	+'@FRAME\nAM=M-1\nD=M\n@THAT\nM=D\n@FRAME\nAM=M-1\nD=M\n@THIS\nM=D\n@FRAME\nAM=M-1\nD=M\n@ARG\nM=D\n@FRAME\nAM=M-1\nD=M\n@LCL\nM=D\n'
 	+'@RET\nA=M\n0;JMP\n')
+	
+def writeCall ( asmfile, command, name, numOfArgs ):
+	global labelcounter
+	global current_function
+	asmfile.write('//'+command+' '+name+' '+numOfArgs+'\n'
+	+'@'+current_function+str(labelcounter)+'\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n'
+	+'@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n'
+	+'@ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n'
+	+'@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n'
+	+'@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n'
+	+'@SP\nD=M\n@5\nD=D-A\n')
+	for i in range(0, int(numOfArgs)):
+		asmfile.write('D=D-1\n')
+	asmfile.write('@ARG\nM=D\n'
+	+'@SP\nD=M\n@LCL\nM=D\n'
+	+'@'+name+'\n0;JMP\n'
+	+'('+current_function+str(labelcounter)+')\n')
+	labelcounter = advance ( labelcounter )
 			
 #MAIN Starts the Translator
 if len(sys.argv) != 2:
@@ -246,6 +280,7 @@ if len(sys.argv) != 2:
 	
 filepath = sys.argv[1]
 
+current_class = ''
 current_function = 'main'
 labelcounter = 0
 initializer (filepath)
