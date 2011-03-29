@@ -1,6 +1,6 @@
 class Main {
 	function void main(){
-		do Output.moveCurser(128, 250);
+		do Output.moveCursor(11, 22);
 		do Output.printString("Hello world!");
 		do Output.println();
 		return;
