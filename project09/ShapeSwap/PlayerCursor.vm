@@ -142,3 +142,215 @@ call Screen.drawRectangle 4
 pop temp 0
 push constant 0
 return
+function PlayerCursor.erase 0
+push argument 0
+pop pointer 0
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 0
+push constant 4
+add
+push this 1
+push constant 1
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push this 1
+push this 0
+push constant 1
+add
+push this 1
+push constant 4
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push this 2
+add
+push constant 4
+sub
+push this 1
+push this 0
+push this 2
+add
+push this 1
+push constant 1
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push this 2
+add
+push constant 1
+sub
+push this 1
+push this 0
+push this 2
+add
+push this 1
+push constant 4
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push this 1
+push this 2
+add
+push constant 1
+sub
+push this 0
+push constant 4
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push this 1
+push this 2
+add
+push constant 4
+sub
+push this 0
+push constant 1
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push this 2
+add
+push constant 4
+sub
+push this 1
+push this 2
+add
+push constant 1
+sub
+push this 0
+push this 2
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push this 2
+add
+push constant 1
+sub
+push this 1
+push this 2
+add
+push constant 4
+sub
+push this 0
+push this 2
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+push constant 0
+return
+function PlayerCursor.moveUp 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 1
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+call PlayerCursor.erase 1
+pop temp 0
+push this 1
+push constant 2
+sub
+pop this 1
+push pointer 0
+call PlayerCursor.draw 1
+pop temp 0
+label IF_FALSE0
+push constant 0
+return
+function PlayerCursor.moveDown 0
+push argument 0
+pop pointer 0
+push this 1
+push this 2
+add
+push constant 254
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+call PlayerCursor.erase 1
+pop temp 0
+push this 1
+push constant 2
+add
+pop this 1
+push pointer 0
+call PlayerCursor.draw 1
+pop temp 0
+label IF_FALSE0
+push constant 0
+return
+function PlayerCursor.moveLeft 0
+push argument 0
+pop pointer 0
+push this 0
+push constant 1
+gt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+call PlayerCursor.erase 1
+pop temp 0
+push this 0
+push constant 2
+sub
+pop this 0
+push pointer 0
+call PlayerCursor.draw 1
+pop temp 0
+label IF_FALSE0
+push constant 0
+return
+function PlayerCursor.moveRight 0
+push argument 0
+pop pointer 0
+push this 0
+push this 2
+add
+push constant 510
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push pointer 0
+call PlayerCursor.erase 1
+pop temp 0
+push this 0
+push constant 2
+add
+pop this 0
+push pointer 0
+call PlayerCursor.draw 1
+pop temp 0
+label IF_FALSE0
+push constant 0
+return

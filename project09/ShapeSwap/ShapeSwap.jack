@@ -16,6 +16,61 @@ class ShapeSwap {
     }
 	
 	method void run() {
-		return;
+        var char key;
+        var boolean exit;
+
+        let exit = false;
+
+        while (~exit) {
+            // waits for a key to be pressed.
+            while (key = 0) {
+                let key = Keyboard.keyPressed();
+            }
+			if (key = 81) {
+                let exit = true;
+            }
+            if (key = 131) {
+                let direction = 1;
+            }
+            if (key = 133) {
+                let direction = 2;
+            }
+            if (key = 130) {
+                let direction = 3;
+            }
+            if (key = 132) {
+                let direction = 4;
+            }
+
+            // waits for the key to be released.
+            if(~(key = 0)) {
+                let key = Keyboard.keyPressed();
+                do moveCursor();
+            }
+			while(~(key = 0)) {
+				let key = Keyboard.keyPressed();
+			}
+        }
+            
+        return;
 	}
+
+    /** Moves the square by 2 in the current direction. */
+    method void moveCursor() {
+        if (direction = 1) {
+            do cursor.moveUp();
+        }
+        if (direction = 2) {
+            do cursor.moveDown();
+        }
+        if (direction = 3) {
+            do cursor.moveLeft();
+        }
+        if (direction = 4) {
+            do cursor.moveRight();
+        }
+
+        do Sys.wait(5); // Delays the next movement.
+        return;
+    }
 }
