@@ -1,0 +1,100 @@
+class Board{
+	field Prng rng;
+	field Array shapes;
+	field int score;
+	fiend int boardSize;
+	
+	constructor Board new(){
+		var int i;
+		let rng = Prng.new();
+		let boardSize = 8;
+		let score = 0;
+		let shapes = Array.new(boardSize*boardSize);
+		let i = 0;
+		while(i < boardSize*boardSize){
+			let shapes[i] = rng.next();
+			i = i + 1;
+		}
+	
+		return this;
+	}
+	
+	method int scoreBoard(){
+		var int i;
+		var int j;
+		var int scoreInc;
+		let i = 0;
+		let scoreInc = 0;
+		
+		while(i < boardSize){
+			let j = 0;
+			while( j < boardSize ){
+				//Checks for five in a row
+				if( j < boardSize-4 && shapes[i*boardSize+j] == shapes[i*boardSize+j+1] && shapes[i*boardSize+j] == shapes[i*boardSize+j+2] && shapes[i*boardSize+j] == shapes[i*boardSize+j+3] && shapes[i*boardSize+j] == shapes[i*boardSize+j+4] ){
+					let scoreInc = scoreInc + 5;
+					let shapes[i*boardSize+j] = rng.next();
+					let shapes[i*boardSize+j+1] = rng.next();
+					let shapes[i*boardSize+j+2] = rng.next();
+					let shapes[i*boardSize+j+3] = rng.next();
+					let shapes[i*boardSize+j+4] = rng.next();
+				}
+				if( i < boardSize-4 && shapes[i*boardSize+j] == shapes[i*boardSize+j+8] && shapes[i*boardSize+j] == shapes[i*boardSize+j+16] && shapes[i*boardSize+j] == shapes[i*boardSize+j+24] && shapes[i*boardSize+j] == shapes[i*boardSize+j+32] ){
+					let scoreInc = scoreInc + 5;
+					let shapes[i*boardSize+j] = rng.next();
+					let shapes[i*boardSize+j+8] = rng.next();
+					let shapes[i*boardSize+j+16] = rng.next();
+					let shapes[i*boardSize+j+24] = rng.next();
+					let shapes[i*boardSize+j+32] = rng.next();
+				}
+				
+				//Checks for four in a row
+				if( j < boardSize-3 && shapes[i*boardSize+j] == shapes[i*boardSize+j+1] && shapes[i*boardSize+j] == shapes[i*boardSize+j+2] && shapes[i*boardSize+j] == shapes[i*boardSize+j+3] ){
+					let scoreInc = scoreInc + 3;
+					let shapes[i*boardSize+j] = rng.next();
+					let shapes[i*boardSize+j+1] = rng.next();
+					let shapes[i*boardSize+j+2] = rng.next();
+					let shapes[i*boardSize+j+3] = rng.next();
+				}
+				if( i < boardSize-3 && shapes[i*boardSize+j] == shapes[i*boardSize+j+8] && shapes[i*boardSize+j] == shapes[i*boardSize+j+16] && shapes[i*boardSize+j] == shapes[i*boardSize+j+24] ){
+					let scoreInc = scoreInc + 3;
+					let shapes[i*boardSize+j] = rng.next();
+					let shapes[i*boardSize+j+8] = rng.next();
+					let shapes[i*boardSize+j+16] = rng.next();
+					let shapes[i*boardSize+j+24] = rng.next();
+				}
+				
+				//Checks for three in a row
+				if( j < boardSize-2 && shapes[i*boardSize+j] == shapes[i*boardSize+j+1] && shapes[i*boardSize+j] == shapes[i*boardSize+j+2] ){
+					let scoreInc = scoreInc + 1;
+					let shapes[i*boardSize+j] = rng.next();
+					let shapes[i*boardSize+j+1] = rng.next();
+					let shapes[i*boardSize+j+2] = rng.next();
+				}
+				if( i < boardSize-2 && shapes[i*boardSize+j] == shapes[i*boardSize+j+8] && shapes[i*boardSize+j] == shapes[i*boardSize+j+16] ){
+					let scoreInc = scoreInc + 1;
+					let shapes[i*boardSize+j] = rng.next();
+					let shapes[i*boardSize+j+8] = rng.next();
+					let shapes[i*boardSize+j+16] = rng.next();
+				}
+				
+				let j = j + 1;
+			}
+			let i = i + 1;
+		}
+		
+		return scoreInc;
+	}
+	
+	method void dispose() {
+		var int i;
+		let i = 0;
+		while(i < size){
+			do shapes[i].dispose();
+			let i = i+1;
+		}
+		do shapes.dispose();
+		do rng.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}
