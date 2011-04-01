@@ -1,0 +1,21 @@
+class ShapeSwap {
+	field PlayerCursor cursor;
+	field int direction;
+	
+	constructor ShapeSwap new() {
+        let cursor = PlayerCursor.new(0, 0, 30);
+        let direction = 0;
+
+        return this;
+    }
+	
+	method void dispose() {
+        do cursor.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+	
+	method void run() {
+		return;
+	}
+}

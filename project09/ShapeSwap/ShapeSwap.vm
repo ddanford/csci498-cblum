@@ -1,0 +1,29 @@
+function ShapeSwap.new 0
+push constant 2
+call Memory.alloc 1
+pop pointer 0
+push constant 0
+push constant 0
+push constant 30
+call PlayerCursor.new 3
+pop this 0
+push constant 0
+pop this 1
+push pointer 0
+return
+function ShapeSwap.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call PlayerCursor.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function ShapeSwap.run 0
+push argument 0
+pop pointer 0
+push constant 0
+return
