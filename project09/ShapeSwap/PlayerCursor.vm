@@ -266,7 +266,7 @@ function PlayerCursor.moveUp 0
 push argument 0
 pop pointer 0
 push this 1
-push constant 1
+push constant 29
 gt
 if-goto IF_TRUE0
 goto IF_FALSE0
@@ -275,7 +275,7 @@ push pointer 0
 call PlayerCursor.erase 1
 pop temp 0
 push this 1
-push constant 2
+push constant 30
 sub
 pop this 1
 push pointer 0
@@ -290,7 +290,7 @@ pop pointer 0
 push this 1
 push this 2
 add
-push constant 254
+push constant 226
 lt
 if-goto IF_TRUE0
 goto IF_FALSE0
@@ -299,7 +299,7 @@ push pointer 0
 call PlayerCursor.erase 1
 pop temp 0
 push this 1
-push constant 2
+push constant 30
 add
 pop this 1
 push pointer 0
@@ -312,7 +312,7 @@ function PlayerCursor.moveLeft 0
 push argument 0
 pop pointer 0
 push this 0
-push constant 1
+push constant 29
 gt
 if-goto IF_TRUE0
 goto IF_FALSE0
@@ -321,7 +321,7 @@ push pointer 0
 call PlayerCursor.erase 1
 pop temp 0
 push this 0
-push constant 2
+push constant 30
 sub
 pop this 0
 push pointer 0
@@ -336,7 +336,7 @@ pop pointer 0
 push this 0
 push this 2
 add
-push constant 510
+push constant 482
 lt
 if-goto IF_TRUE0
 goto IF_FALSE0
@@ -345,7 +345,7 @@ push pointer 0
 call PlayerCursor.erase 1
 pop temp 0
 push this 0
-push constant 2
+push constant 30
 add
 pop this 0
 push pointer 0
