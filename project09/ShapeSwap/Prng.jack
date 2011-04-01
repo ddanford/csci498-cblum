@@ -1,0 +1,40 @@
+//Uses Blum Blum Shub algorithm to create a series of random numbers
+class Prng {
+	field int p; //First prime
+	field int q; //Second prime
+	field int M; //p*q
+	field int num; //Current random number in series
+	
+	constructor Prng new(){
+		p = 7;
+		q = 23;
+		//Primes were selected to create an M close to the sqrt of the maximum int
+		M = p*q;
+		num = p; //Start the series with p
+		
+		return this;
+	}
+	
+	method int modulo(int n, int d){
+		var int m;
+		var int temp;
+		let m = n;
+		if( n > d){
+			let m = n - n/d;
+		}
+		
+		return m;
+	}
+	
+	method int next(){
+		let num = modulo(num*num, M);
+		return num;
+	}
+
+	method void dispose() {
+        
+        do Memory.deAlloc(this);
+        return;
+    }
+
+}
