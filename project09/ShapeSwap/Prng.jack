@@ -1,4 +1,4 @@
-//Uses Blum Blum Shub algorithm to create a series of random numbers
+//Uses Blum Blum Shub algorithm to create a series of random numbers between 0-3
 class Prng {
 	field int p; //First prime
 	field int q; //Second prime
@@ -27,7 +27,7 @@ class Prng {
 	}
 	
 	method int next(){
-		let num = modulo(num*num, M);
+		let num = modulo(modulo(num*num, M), 4);
 		return num;
 	}
 
