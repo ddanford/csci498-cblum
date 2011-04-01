@@ -17,11 +17,7 @@ class Prng {
 	
 	method int modulo(int n, int d){
 		var int m;
-		var int temp;
-		let m = n;
-		if( n > d){
-			let m = n - n/d;
-		}
+		let m = n - n/d;
 		
 		return m;
 	}
@@ -32,7 +28,6 @@ class Prng {
 	}
 
 	method void dispose() {
-        
         do Memory.deAlloc(this);
         return;
     }
