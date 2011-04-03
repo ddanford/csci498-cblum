@@ -71,7 +71,7 @@ class PlayerCursor {
     }
 
     method void moveRight() {
-        if ((x + size) < 482) {
+        if ((x + size) < 226) {
             do erase();
             let x = x + 30;
             do draw();

@@ -210,24 +210,32 @@ class Board{
     }
 	
 	method void drawSquare(int x, int y, int size) {
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x+5, y+5, x+size-5, y+size-5);
 		do Screen.setColor(true);
 		do Screen.drawRectangle(x+5, y+5, x+size-5, y+size-5);
 		return;
 	}
 	
 /*	method void drawCircle(int x, int y, int size) {
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x+5, y+5, x+size-5, y+size-5);
 		do Screen.setColor(true);
 		do Screen.drawCircle(x+size/2, y+size/2, (size-10)/2);
 		return;
 	}
 */	
 	method void drawDot(int x, int y, int size){
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x+5, y+5, x+size-5, y+size-5);
 		do Screen.setColor(true);
 		do Screen.drawCircle(x+(size/2), y+(size/2), (size-10)/2);
 		return;
 	}
 	
 	method void drawPlus(int x, int y, int size) {
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x+5, y+5, x+size-5, y+size-5);
 		do Screen.setColor(true);
 		do Screen.drawRectangle(x+5, y+12, x+size-5, y+size-12);
 		do Screen.drawRectangle(x+12, y+5, x+size-12, y+size-5);
@@ -235,6 +243,8 @@ class Board{
 	}
 	
 	method void drawClover(int x, int y, int size) {
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x+5, y+5, x+size-5, y+size-5);
 		do Screen.setColor(true);
 		do Screen.drawCircle(x+11, y+11, (size-20)/2);
 		do Screen.drawCircle(x+11, y+19, (size-20)/2);
