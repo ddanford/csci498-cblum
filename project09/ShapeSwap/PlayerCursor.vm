@@ -336,7 +336,7 @@ pop pointer 0
 push this 0
 push this 2
 add
-push constant 482
+push constant 226
 lt
 if-goto IF_TRUE0
 goto IF_FALSE0

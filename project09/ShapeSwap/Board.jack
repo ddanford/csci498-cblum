@@ -323,6 +323,7 @@ class Board{
 		do Output.moveCursor(15, 40);
 		do Output.printString("Score: ");
 		do Output.printInt(score);
+		do drawMoveInstructions();
 		while( i < 8 ){
 			let j = 0;
 			while( j < 8 ){
@@ -379,14 +380,6 @@ class Board{
 		return;
 	}
 	
-/*	method void drawCircle(int x, int y, int size) {
-		do Screen.setColor(false);
-		do Screen.drawRectangle(x+5, y+5, x+size-5, y+size-5);
-		do Screen.setColor(true);
-		do Screen.drawCircle(x+size/2, y+size/2, (size-10)/2);
-		return;
-	}
-*/	
 	method void drawDot(int x, int y, int size){
 		do Screen.setColor(false);
 		do Screen.drawRectangle(x+5, y+5, x+size-5, y+size-5);
@@ -412,6 +405,34 @@ class Board{
 		do Screen.drawCircle(x+11, y+19, (size-20)/2);
 		do Screen.drawCircle(x+19, y+11, (size-20)/2);
 		do Screen.drawCircle(x+19, y+19, (size-20)/2);
+		return;
+	}
+
+	method void drawSwapInstructions(){
+		do Output.moveCursor(5, 40);
+		do Output.printString("                ");
+		do Output.moveCursor(6,40);
+		do Output.printString("              ");
+		
+		do Output.moveCursor(10, 40);
+		do Output.printString("Arrow keys swaps.");
+		do Output.moveCursor(11, 40);
+		do Output.printString("Anything else cancels.");
+		
+		return;
+	}
+	
+	method void drawMoveInstructions(){
+		do Output.moveCursor(10, 40);
+		do Output.printString("                 ");
+		do Output.moveCursor(11, 40);
+		do Output.printString("                      ");
+		
+		do Output.moveCursor(5, 40);
+		do Output.printString("Arrow Keys move.");
+		do Output.moveCursor(6,40);
+		do Output.printString("Space selects.");
+		
 		return;
 	}
 }
