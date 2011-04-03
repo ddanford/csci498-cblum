@@ -65,12 +65,12 @@ class ShapeSwap {
 					}
 				}
 				if (key = 130) {
-					if ( (currentpos - (currentpos / 8) ) > 0) {
+					if ( (currentpos - (8*(currentpos / 8)) ) > 0) {
 						do theBoard.swap(currentpos, (currentpos - 1)); 
 					}
 				}
 				if (key = 132) {
-					if ( (currentpos - (currentpos / 8) ) < 7) {
+					if ( (currentpos - (8*(currentpos / 8)) ) < 7) {
 						do theBoard.swap(currentpos, (currentpos + 1)); 
 					}
 				}
