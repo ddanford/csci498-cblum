@@ -1,30 +1,21 @@
 //Uses Blum Blum Shub algorithm to create a series of random numbers between 0-3
 class Prng {
-	field int p; //First prime
-	field int q; //Second prime
-	field int M; //p*q
-	field int num; //Current random number in series
+	field String nums;
+	field int loc;
 	
 	constructor Prng new(){
-		p = 7;
-		q = 23;
-		//Primes were selected to create an M close to the sqrt of the maximum int
-		M = p*q;
-		num = p; //Start the series with p
-		
+		let nums = "2013321203113313323010021033002330103213313122302330133132032120";
+		let loc = 0;
+
 		return this;
 	}
 	
-	method int modulo(int n, int d){
-		var int m;
-		let m = n - n/d;
-		
-		return m;
-	}
-	
-	method int next(){
-		let num = modulo(modulo(num*num, M), 4);
-		return num;
+	method char next(){
+		let loc = loc + 1;
+		if( loc > 63 ){
+			let loc = 0;
+		}
+		return nums.charAt(loc);
 	}
 
 	method void dispose() {

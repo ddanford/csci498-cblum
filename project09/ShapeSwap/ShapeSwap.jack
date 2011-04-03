@@ -1,9 +1,11 @@
 class ShapeSwap {
 	field PlayerCursor cursor;
+	field Board theBoard;
 	field int direction;
 	
 	constructor ShapeSwap new() {
         let cursor = PlayerCursor.new(0, 0, 30);
+		let theBoard = Board.new();
         let direction = 0;
 
         return this;
@@ -20,7 +22,9 @@ class ShapeSwap {
         var boolean exit;
 
         let exit = false;
-
+		
+		do theBoard.drawBoard();
+		
         while (~exit) {
             // waits for a key to be pressed.
             while (key = 0) {
