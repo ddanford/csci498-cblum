@@ -43,6 +43,11 @@ class Board{
 					let shapes[i*boardSize+j+2] = rng.next();
 					let shapes[i*boardSize+j+3] = rng.next();
 					let shapes[i*boardSize+j+4] = rng.next();
+					do drawShapeAt(i*boardSize+j);
+					do drawShapeAt(i*boardSize+j+1);
+					do drawShapeAt(i*boardSize+j+2);
+					do drawShapeAt(i*boardSize+j+3);
+					do drawShapeAt(i*boardSize+j+4);
 				}}}}}
 				if( i < boardSize-4 ){
 				if( shapes[i*boardSize+j] = shapes[i*boardSize+j+8] ){
@@ -55,6 +60,11 @@ class Board{
 					let shapes[i*boardSize+j+16] = rng.next();
 					let shapes[i*boardSize+j+24] = rng.next();
 					let shapes[i*boardSize+j+32] = rng.next();
+					do drawShapeAt(i*boardSize+j);
+					do drawShapeAt(i*boardSize+j+8);
+					do drawShapeAt(i*boardSize+j+16);
+					do drawShapeAt(i*boardSize+j+24);
+					do drawShapeAt(i*boardSize+j+32);
 				}}}}}
 				
 				//Checks for four in a row
@@ -67,6 +77,10 @@ class Board{
 					let shapes[i*boardSize+j+1] = rng.next();
 					let shapes[i*boardSize+j+2] = rng.next();
 					let shapes[i*boardSize+j+3] = rng.next();
+					do drawShapeAt(i*boardSize+j);
+					do drawShapeAt(i*boardSize+j+1);
+					do drawShapeAt(i*boardSize+j+2);
+					do drawShapeAt(i*boardSize+j+3);
 				}}}}
 				if( i < boardSize-3 ){
 				if( shapes[i*boardSize+j] = shapes[i*boardSize+j+8] ){
@@ -77,6 +91,10 @@ class Board{
 					let shapes[i*boardSize+j+8] = rng.next();
 					let shapes[i*boardSize+j+16] = rng.next();
 					let shapes[i*boardSize+j+24] = rng.next();
+					do drawShapeAt(i*boardSize+j);
+					do drawShapeAt(i*boardSize+j+8);
+					do drawShapeAt(i*boardSize+j+16);
+					do drawShapeAt(i*boardSize+j+24);
 				}}}}
 				
 				//Checks for three in a row
@@ -87,6 +105,9 @@ class Board{
 					let shapes[i*boardSize+j] = rng.next();
 					let shapes[i*boardSize+j+1] = rng.next();
 					let shapes[i*boardSize+j+2] = rng.next();
+					do drawShapeAt(i*boardSize+j);
+					do drawShapeAt(i*boardSize+j+1);
+					do drawShapeAt(i*boardSize+j+2);
 				}}}
 				if( i < boardSize-2 ){
 				if( shapes[i*boardSize+j] = shapes[i*boardSize+j+8] ){
@@ -95,6 +116,9 @@ class Board{
 					let shapes[i*boardSize+j] = rng.next();
 					let shapes[i*boardSize+j+8] = rng.next();
 					let shapes[i*boardSize+j+16] = rng.next();
+					do drawShapeAt(i*boardSize+j);
+					do drawShapeAt(i*boardSize+j+8);
+					do drawShapeAt(i*boardSize+j+16);
 				}}}
 				
 				let j = j + 1;
@@ -103,6 +127,31 @@ class Board{
 		}
 		
 		return scoreInc;
+	}
+	
+	method void drawShapeAt(int pos){
+		var int x;
+		var int y;
+		let x = (pos/8) * 30;
+		let y = (pos - (pos/8)) * 30;
+		
+		if( shapes[pos] = 48 ){
+			do drawSquare(x, y, 30);
+		}
+		else{
+			if( shapes[pos] = 49 ){
+				do drawDot(x, y, 30);
+			}
+			else{
+				if( shapes[pos] = 50 ){
+					do drawPlus(x, y, 30);
+				}
+				else{
+					do drawClover(x, y, 30);
+				}
+			}
+		}
+		return;
 	}
 	
 	method void drawBoard(){
@@ -140,6 +189,16 @@ class Board{
 			}
 			let i = i + 1;
 		}
+		return;
+	}
+	
+	method void swap(int pos1, int pos2){
+		var char temp;
+		let temp = shapes[pos1];
+		let shapes[pos1] = shapes[pos2];
+		let shapes[pos2] = temp;
+		do drawShapeAt(pos1);
+		do drawShapeAt(pos2);
 		return;
 	}
 	
