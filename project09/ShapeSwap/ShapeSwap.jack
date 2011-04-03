@@ -106,13 +106,13 @@ class ShapeSwap {
         }
         if (direction = 3) {
             do cursor.moveLeft();
-			if ( (currentpos - (currentpos / 8) ) > 0) {
+			if ((currentpos - (8*(currentpos / 8))) > 0) {
 				let currentpos = currentpos - 1;
 			}
         }
         if (direction = 4) {
             do cursor.moveRight();
-			if ( (currentpos - (currentpos / 8) ) < 7) {
+			if ((currentpos - (8*(currentpos / 8))) < 7) {
 				let currentpos = currentpos + 1;
 			}
         }
