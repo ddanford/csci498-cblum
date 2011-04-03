@@ -28,6 +28,7 @@ class ShapeSwap {
 		do theBoard.drawBoard();
 		
         while (~exit) {
+			do theBoard.drawMoveInstructions();
             // waits for a key to be pressed.
             while (key = 0) {
                 let key = Keyboard.keyPressed();
@@ -48,6 +49,7 @@ class ShapeSwap {
                 let direction = 4;
             }
 			if (key = 32) {
+				do theBoard.drawSwapInstructions();
 				while(~(key = 0)) {
 					let key = Keyboard.keyPressed();
 				}
