@@ -133,7 +133,7 @@ class Board{
 		var int x;
 		var int y;
 		let x = (pos/8) * 30;
-		let y = (pos - (pos/8)) * 30;
+		let y = (pos - (8*(pos/8))) * 30;
 		
 		if( shapes[pos] = 48 ){
 			do drawSquare(x, y, 30);
