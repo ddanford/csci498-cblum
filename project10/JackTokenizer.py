@@ -56,8 +56,24 @@ def initializer ( filepath ):
 		asmfile.close()
 		
 def tokenizeFile ( jackfile, xmlfile ):
-	return 0;
+	jackcommands = jackfile.readlines()
+	jackcommands = stripComments( jackcommands )
+	commandcounter = 0
+	numberofcommands = len(jackcommands)
 
+def stripComments ( jackcommands ):
+	commandcounter = 0
+	numberofcommands = len(jackcommands)
+	while ( commandcounter < numberofcommands ):
+		jackcommands[commandcounter] = jackcommands[commandcounter].partition("//")[0].strip()
+		if jackcommands[commandcounter].partition("/**")[1] == "/**":
+			while (jackcommands[commandcounter].partition("*/")[1] != "*/"):
+				jackcommands[commandcounter] = ""
+				commandcounter = commandcounter + 1
+			jackcommands[commandcounter] = ""
+		commandcounter = commandcounter + 1
+	return jackcommands
+	
 if len(sys.argv) != 2:
 	print('Invalid syntax for JackTokenizer.py. Proper syntax is JackTokenizer.py [filepath | directory]')
 	quit()
