@@ -10,7 +10,7 @@ def tokenType( token ):
 	if re.match('[0-9]+', token) != None:
 		return 'integerConstant'
 	if re.match('".+"', token) != None:
-		return 'StringConstant'
+		return 'stringConstant'
 	if re.match('[a-zA-Z][a-zA-Z0-9_]*', token) != None:
 		return 'identifier'
 
@@ -60,6 +60,15 @@ def tokenizeFile ( jackfile, xmlfile ):
 	jackcommands = stripComments( jackcommands )
 	commandcounter = 0
 	numberofcommands = len(jackcommands)
+	xmlfile.write('<tokens>\n')
+	for command in jackcommands:
+		for token in re.split('(".+"|[{}()\[\].,;+\-*/&|<>=~ ])', command):
+			type = tokenType(token)
+			if type == 'StringConstant':
+				token = token[1:len(token)-1]
+			if type != None:
+				xmlfile.write('<'+type+'> '+token+' </'+type+'>\n')
+	xmlfile.write('</tokens>\n')
 
 def stripComments ( jackcommands ):
 	commandcounter = 0
