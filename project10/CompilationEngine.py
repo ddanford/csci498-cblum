@@ -2,6 +2,18 @@ import sys
 import os
 import re
 
+def tokenType( token ):
+	if re.match('class|constructor|function|method|field|static|var|int|char|boolean|void|true|false|null|this|let|do|if|else|while|return', token) != None:
+		return 'keyword'
+	if re.match('[{}()\[\].,;+\-*/&|<>=~]', token) != None:
+		return 'symbol'
+	if re.match('[0-9]+', token) != None:
+		return 'integerConstant'
+	if re.match('".+"', token) != None:
+		return 'stringConstant'
+	if re.match('[a-zA-Z][a-zA-Z0-9_]*', token) != None:
+		return 'identifier'
+
 def initializer ( filepath ):
 	#Checks to see if the path given is a directory. If it is, it iterates through each file in the directory to see if it is a .jack file
 	if (os.path.isdir(filepath)):
@@ -26,7 +38,7 @@ def initializer ( filepath ):
 					jackfile.close()
 					xmlfile.close()
 	else:
-		if (filepath.partition('.vm')[1] != '.jack'):
+		if (filepath.partition('.jack')[1] != '.jack'):
 			print('Invalid file. Must be a .jack file')
 			quit()
 		try:
@@ -40,22 +52,33 @@ def initializer ( filepath ):
 			print("Could not open output file: " + filepath.partition('.jack')[0] + '.generated.xml')
 			quit()
 		parseFile ( jackfile, xmlfile )
-		vmfile.close()
-		asmfile.close()
+		jackfile.close()
+		xmlfile.close()
 		
 def parseFile ( jackfile, xmlfile ):
 	jackcommands = jackfile.readlines()
 	jackcommands = stripComments( jackcommands )
 	tokenlist = []
-	numtokens = 0
 	for command in jackcommands:
 		for token in re.split('(".+"|[{}()\[\].,;+\-*/&|<>=~ ])', command):
 			type = tokenType(token)
 			if type == 'StringConstant':
 				token = token[1:len(token)-1]
 			if type != None:
-				tokenlist[numtokens] = token
-				numtokens = numtokens + 1
+				if token == '<':
+					token = '&lt;'
+				elif token == '>':
+					token = '&gt;'
+				elif token == '&':
+					token = '&amp;'
+				elif token == '"':
+					token = '&quot;'
+				tokenlist.append(token)
+	numtokens = len(tokenlist)
+	if tokenlist[0] != 'class':
+		print('Improper systax for '+os.path(jackfile)+'. Must begin file with class declaration.')
+		return -1
+	compileClass( xmlfile, tokenlist, numtokens, 2)
 	
 def stripComments ( jackcommands ):
 	commandcounter = 0
@@ -69,10 +92,305 @@ def stripComments ( jackcommands ):
 			jackcommands[commandcounter] = ""
 		commandcounter = commandcounter + 1
 	return jackcommands
+	
+def compileClass( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	xmlfile.write('<class>\n')
+	while True:
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		if (tokenlist[tokencounter-1] == '{'):
+			break
+	while True:
+		if (tokenlist[tokencounter] == 'static' or tokenlist[tokencounter] == 'field'):
+			compileClassVarDec( xmlfile, tokenlist, numtokens, numtabs+2)
+		else:
+			break
+	while True:
+		if (tokenlist[tokencounter] == 'method' or tokenlist[tokencounter] == 'constructor' or tokenlist[tokencounter] == 'function'):
+			compileSubroutine( xmlfile, tokenlist, numtokens, numtabs+2)
+		else:
+			break
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	xmlfile.write('</class>\n')
+	
+def compileClassVarDec( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<classVarDec>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	while True:
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		if (tokenlist[tokencounter-1] == ';'):
+			break
+	decstring = '</classVarDec>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
 
+def compileSubroutine( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<subroutineDec>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	while True:
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		if (tokenlist[tokencounter-1] == '('):
+			break
+	compileParameterList( xmlfile, tokenlist, numtokens, numtabs+2 )
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	decstring = '<subroutineBody>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs))
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs+2))
+	while True:
+		if (tokenlist[tokencounter] == 'var' ):
+			compileVarDec( xmlfile, tokenlist, numtokens, numtabs+4)
+		else:
+			break
+	compileStatements( xmlfile, tokenlist, numtokens, numtabs+4)
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs+2))
+	decstring = '</subroutineBody>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs))
+	decstring = '</subroutineDec>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileParameterList( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<parameterList>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	while tokenlist[tokencounter] != ')':
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	decstring = '</parameterList>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileVarDec( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<varDec>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	while True:
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		if (tokenlist[tokencounter-1] == ';'):
+			break
+	decstring = '</varDec>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+
+def compileStatements ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<statements>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	while True:
+		if (tokenlist[tokencounter] == 'let'):
+			compileLet( xmlfile, tokenlist, numtokens, numtabs+2 )
+		elif (tokenlist[tokencounter] == 'do'):
+			compileDo( xmlfile, tokenlist, numtokens, numtabs+2 )
+		elif (tokenlist[tokencounter] == 'if'):
+			compileIf( xmlfile, tokenlist, numtokens, numtabs+2 )
+		elif (tokenlist[tokencounter] == 'while'):
+			compileWhile( xmlfile, tokenlist, numtokens, numtabs+2 )
+		elif (tokenlist[tokencounter] == 'return'):
+			compileReturn( xmlfile, tokenlist, numtokens, numtabs+2 )
+		else:
+			break
+	decstring = '</statements>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+
+def compileDo ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<doStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	while True:
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		if (tokenlist[tokencounter-1] == '('):
+			compileExpressionList( xmlfile, tokenlist, numtokens, numtabs+2 )
+		if (tokenlist[tokencounter-1] == ';'):
+			break
+	decstring = '</doStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileLet ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<letStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	while True:
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		if (tokenlist[tokencounter-1] == '='):
+			compileExpression( xmlfile, tokenlist, numtokens, numtabs+2 )
+		if (tokenlist[tokencounter-1] == ';'):
+			break
+	decstring = '</letStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileIf ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<ifStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+
+	compileExpression( xmlfile, tokenlist, numtokens, numtabs+2 )
+
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))	
+
+	compileStatements( xmlfile, tokenlist, numtokens, numtabs+2)
+
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))	
+
+	decstring = '</ifStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileWhile ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<whileStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	
+	compileExpression( xmlfile, tokenlist, numtokens, numtabs+2 )
+	
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))	
+
+	compileStatements( xmlfile, tokenlist, numtokens, numtabs+2)
+
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	
+	decstring = '</whileStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileReturn ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<returnStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	if (tokenlist[tokencounter] != ';'):
+		compileExpression( xmlfile, tokenlist, numtokens, numtabs+2 )
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	decstring = '</returnStatement>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileExpression ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<expression>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	inparens = False
+	while True:
+		if (tokenType(tokenlist[tokencounter]) == 'identifier' 
+		or tokenType(tokenlist[tokencounter]) == 'integerConstant' 
+		or tokenType(tokenlist[tokencounter]) == 'stringConstant'):
+			compileTerm( xmlfile, tokenlist, numtokens, numtabs+2)
+		elif (tokenlist[tokencounter] == '('):
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+			inparens = True
+			compileExpression( xmlfile, tokenlist, numtokens, numtabs+2 )
+		elif (tokenlist[tokencounter] == ')' and inparens == True):
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+			inparens = False
+		else:
+			break
+	decstring = '</expression>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileTerm ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<term>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	type = tokenType(tokenlist[tokencounter])
+	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+	tokencounter = tokencounter + 1
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))	
+	decstring = '</term>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
+def compileExpressionList ( xmlfile, tokenlist, numtokens, numtabs ):
+	global tokencounter
+	decstring = '<expressionList>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	while tokenlist[tokencounter] != ')':
+		compileExpression( xmlfile, tokenlist, numtokens, numtabs+2 )
+		if tokenlist[tokencounter] == ',':
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	decstring = '</expressionList>\n'
+	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
+	
 if len(sys.argv) != 2:
 	print('Invalid syntax for JackTokenizer.py. Proper syntax is JackTokenizer.py [filepath | directory]')
 	quit()
-	
+
+tokencounter = 0
 filepath = sys.argv[1]
 initializer (filepath)
