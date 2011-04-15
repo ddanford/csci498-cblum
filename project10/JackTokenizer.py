@@ -38,7 +38,7 @@ def initializer ( filepath ):
 					jackfile.close()
 					xmlfile.close()
 	else:
-		if (filepath.partition('.vm')[1] != '.jack'):
+		if (filepath.partition('.jack')[1] != '.jack'):
 			print('Invalid file. Must be a .jack file')
 			quit()
 		try:
