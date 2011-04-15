@@ -52,8 +52,8 @@ def initializer ( filepath ):
 			print("Could not open output file: " + filepath.partition('.jack')[0] + 'T.generated.xml')
 			quit()
 		tokenizeFile ( jackfile, xmlfile )
-		vmfile.close()
-		asmfile.close()
+		jackfile.close()
+		xmlfile.close()
 		
 def tokenizeFile ( jackfile, xmlfile ):
 	jackcommands = jackfile.readlines()
