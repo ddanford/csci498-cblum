@@ -34,7 +34,9 @@ def initializer ( filepath ):
 					except:
 						print("Could not open output file: " + filepath.partition('.jack')[0] + '.generated.xml')
 						quit()
-					tokenizeFile ( jackfile, xmlfile )
+					parseFile ( jackfile, xmlfile )
+					global tokencounter
+					tokencounter = 0
 					jackfile.close()
 					xmlfile.close()
 	else:
