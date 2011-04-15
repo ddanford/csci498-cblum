@@ -64,9 +64,17 @@ def tokenizeFile ( jackfile, xmlfile ):
 	for command in jackcommands:
 		for token in re.split('(".+"|[{}()\[\].,;+\-*/&|<>=~ ])', command):
 			type = tokenType(token)
-			if type == 'StringConstant':
+			if type == 'stringConstant':
 				token = token[1:len(token)-1]
 			if type != None:
+				if token == '<':
+					token = '&lt;'
+				elif token == '>':
+					token = '&gt;'
+				elif token == '&':
+					token = '&amp;'
+				elif token == '"':
+					token = '&quot;'
 				xmlfile.write('<'+type+'> '+token+' </'+type+'>\n')
 	xmlfile.write('</tokens>\n')
 
