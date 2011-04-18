@@ -9,7 +9,7 @@ def tokenType( token ):
 		return 'symbol'
 	if re.match('[0-9]+', token) != None:
 		return 'integerConstant'
-	if re.match('".+"', token) != None:
+	if re.match('".+"', token) != None or re.match('.*[\s]+.*', token.strip()) != None:
 		return 'stringConstant'
 	if re.match('[a-zA-Z][a-zA-Z0-9_]*', token) != None:
 		return 'identifier'
@@ -64,7 +64,7 @@ def parseFile ( jackfile, xmlfile ):
 	for command in jackcommands:
 		for token in re.split('(".+"|[{}()\[\].,;+\-*/&|<>=~ ])', command):
 			type = tokenType(token)
-			if type == 'StringConstant':
+			if type == 'stringConstant':
 				token = token[1:len(token)-1]
 			if type != None:
 				if token == '<':
@@ -242,6 +242,16 @@ def compileLet ( xmlfile, tokenlist, numtokens, numtabs ):
 		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
 		tokencounter = tokencounter + 1
 		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		if tokenlist[tokencounter] == '[':
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+			compileExpression( xmlfile, tokenlist, numtokens, numtabs+2)
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
 		if (tokenlist[tokencounter-1] == '='):
 			compileExpression( xmlfile, tokenlist, numtokens, numtabs+2 )
 		if (tokenlist[tokencounter-1] == ';'):
@@ -279,7 +289,22 @@ def compileIf ( xmlfile, tokenlist, numtokens, numtabs ):
 	type = tokenType(tokenlist[tokencounter])
 	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
 	tokencounter = tokencounter + 1
-	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))	
+	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	
+	if tokenlist[tokencounter] == 'else':
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		compileStatements(xmlfile, tokenlist, numtokens, numtabs+2)
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
 
 	decstring = '</ifStatement>\n'
 	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
@@ -342,23 +367,34 @@ def compileExpression ( xmlfile, tokenlist, numtokens, numtabs ):
 	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
 	inparens = False
 	while True:
-		if (tokenType(tokenlist[tokencounter]) == 'identifier' 
-		or tokenType(tokenlist[tokencounter]) == 'integerConstant' 
-		or tokenType(tokenlist[tokencounter]) == 'stringConstant'):
+		if (tokenType(tokenlist[tokencounter]) == 'identifier'):
+			compileTerm( xmlfile, tokenlist, numtokens, numtabs+2)
+		elif (tokenType(tokenlist[tokencounter]) == 'integerConstant'):
+			compileTerm( xmlfile, tokenlist, numtokens, numtabs+2)
+		elif (tokenType(tokenlist[tokencounter]) == 'stringConstant'):
 			compileTerm( xmlfile, tokenlist, numtokens, numtabs+2)
 		elif (tokenlist[tokencounter] == '('):
+			compileTerm( xmlfile, tokenlist, numtokens, numtabs+2)
+		elif (tokenlist[tokencounter] == 'true' 
+		or tokenlist[tokencounter] == 'false' 
+		or tokenlist[tokencounter] == 'null' 
+		or tokenlist[tokencounter] == 'this'):
+			compileTerm( xmlfile, tokenlist, numtokens, numtabs+2)
+		elif (tokenlist[tokencounter] == '+'
+		or tokenlist[tokencounter] == '-'
+		or tokenlist[tokencounter] == '*'
+		or tokenlist[tokencounter] == '/'
+		or tokenlist[tokencounter] == '&amp;'
+		or tokenlist[tokencounter] == '|'
+		or tokenlist[tokencounter] == '&lt;'
+		or tokenlist[tokencounter] == '&gt;'
+		or tokenlist[tokencounter] == '='):
 			type = tokenType(tokenlist[tokencounter])
 			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
 			tokencounter = tokencounter + 1
 			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-			inparens = True
-			compileExpression( xmlfile, tokenlist, numtokens, numtabs+2 )
-		elif (tokenlist[tokencounter] == ')' and inparens == True):
-			type = tokenType(tokenlist[tokencounter])
-			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-			tokencounter = tokencounter + 1
-			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-			inparens = False
+		elif (tokenlist[tokencounter] == '-' or tokenlist[tokencounter] == '~'):
+			compileTerm( xmlfile, tokenlist, numtokens, numtabs+2)
 		else:
 			break
 	decstring = '</expression>\n'
@@ -368,10 +404,70 @@ def compileTerm ( xmlfile, tokenlist, numtokens, numtabs ):
 	global tokencounter
 	decstring = '<term>\n'
 	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
-	type = tokenType(tokenlist[tokencounter])
-	tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-	tokencounter = tokencounter + 1
-	xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))	
+	if (tokenlist[tokencounter] == '('):
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		compileExpression (xmlfile, tokenlist, numtokens, numtabs+2)
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	elif (tokenType(tokenlist[tokencounter]) == 'identifier'):
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		if tokenlist[tokencounter] == '.':
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+			compileExpressionList( xmlfile, tokenlist, numtokens, numtabs+2)
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		elif tokenlist[tokencounter] == '[':
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+			compileExpression( xmlfile, tokenlist, numtokens, numtabs+2)
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		elif tokenlist[tokencounter] == '(':
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+			compileExpressionList( xmlfile, tokenlist, numtokens, numtabs+2)
+			type = tokenType(tokenlist[tokencounter])
+			tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+			tokencounter = tokencounter + 1
+			xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+	elif (tokenlist[tokencounter] == '-' or tokenlist[tokencounter] == '~'):
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
+		compileTerm(xmlfile, tokenlist, numtokens, numtabs+2)
+	else:
+		type = tokenType(tokenlist[tokencounter])
+		tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
+		tokencounter = tokencounter + 1
+		xmlfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
 	decstring = '</term>\n'
 	xmlfile.write(decstring.rjust(len(decstring)+numtabs-2))
 	
