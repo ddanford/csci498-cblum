@@ -465,7 +465,6 @@ def compileExpressionList ( vmfile, tokenlist, localTokens ):
     #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     numExpressions = 0
     while tokenlist[tokencounter] != ')':
-        print(tokenlist[tokencounter])
         numExpressions += 1
         compileExpression( vmfile, tokenlist, localTokens )
         if tokenlist[tokencounter] == ',':
