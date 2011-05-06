@@ -111,12 +111,17 @@ def compileClass( vmfile, tokenlist ):
     
 def compileClassVarDec( vmfile, tokenlist ):
     global tokencounter, globalTokens
-    while True:
-        tokencounter = tokencounter + 1
-        if (tokenlist[tokencounter-1] == ';'):
-            break
-    decstring = '</classVarDec>\n'
-    vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
+    while tokenlist[tokencounter] == 'field':
+        tokencounter += 1 #Skip field
+        varType = tokenlist[tokencounter]
+        tokencounter += 1
+        while tokenlist[tokencounter] != ';':
+            if tokenlist[tokencounter] == ',':
+                tokencounter += 1
+            tempstring = varType + ' field ' + str(numLocals)
+            globalTokens[tokenlist[tokencounter]] = tempstring.split()
+            tokencounter += 1
+        tokencounter += 1
 
 def compileSubroutine( vmfile, tokenlist ):
     global tokencounter, currentclass
@@ -149,8 +154,21 @@ def compileSubroutine( vmfile, tokenlist ):
         compileStatements( vmfile, tokenlist, localTokens )
         tokencounter += 1 # For the }
     else:
-        quit()
-        
+        # Compile constructor
+        tokencounter += 1
+        returntype = tokenlist[tokencounter]
+        tokencounter += 1
+        functionname = tokenlist[tokencounter]
+        tokencounter += 2
+        localTokens = {}
+        compileParameterList( vmfile, tokenlist, localTokens )
+        tokencounter += 2 # For the {
+        numLocals = compileVarDec( vmfile, tokenlist, localTokens )
+        vmfile.write('function ' + currentclass + '.' + functionname + ' ' + str(numLocals)+'\n')
+        classsize = len(globalTokens)
+        vmfile.write('push constant '+str(classsize)+'\ncall Memory.alloc 1\npop pointer 0\n')
+        compileStatements( vmfile, tokenlist, localTokens )
+        tokencounter += 1 # For the }
     
 def compileParameterList( vmfile, tokenlist, localTokens ):
     global tokencounter
@@ -328,7 +346,8 @@ def compileExpression ( vmfile, tokenlist, localTokens ):
             vmfile.write("push constant 0\n")
             tokencounter += 1
         elif (tokenlist[tokencounter] == 'this'):
-            print("lol I dunno")
+            vmfile.write("push pointer 0\n")
+            tokencounter += 1
         elif (tokenType(tokenlist[tokencounter]) == 'identifier'):
             compileTerm( vmfile, tokenlist, localTokens)
         elif (tokenType(tokenlist[tokencounter]) == 'integerConstant'):
