@@ -201,7 +201,7 @@ def compileDo ( vmfile, tokenlist, localTokens ):
             functionName += tokenlist[tokencounter]
         else:
             functionName = currentclass + '.' + functionName
-        tokencounter = tokencounter + 1
+        tokencounter = tokencounter + 2
         numArgs = compileExpressionList( vmfile, tokenlist, localTokens )
         vmfile.write('call ' + functionName + ' ' + str(numArgs)+'\n' )
         if (tokenlist[tokencounter] == ';' or tokenlist[tokencounter-1] == ';'):
@@ -221,6 +221,8 @@ def compileLet ( vmfile, tokenlist, localTokens ):
         localTokens[ tokenlist[tokencounter] ] = 'local ' + str(localTokens.size())
         popLocation = localTokens[ tokenlist[tokencounter] ]
     while True:
+        print(tokenlist[tokencounter])
+        print(tokencounter)
         tokencounter = tokencounter + 1
         if tokenlist[tokencounter] == '[':
             tokencounter = tokencounter + 1 #Skip [
@@ -245,7 +247,7 @@ def compileIf ( vmfile, tokenlist, localTokens ):
     compileExpression( vmfile, tokenlist, localTokens)
     vmfile.write("not\n")
     vmfile.write("if-goto " + firstiflabel + "\n")
-    tokencounter += 2
+    tokencounter += 1
     compileStatements( vmfile, tokenlist, localTokens )
     vmfile.write("goto " + secondiflabel + "\n")
     vmfile.write("label " + firstiflabel + "\n")
@@ -264,7 +266,7 @@ def compileWhile ( vmfile, tokenlist, localTokens ):
     compileExpression( vmfile, tokenlist, localTokens)
     vmfile.write("not\n")
     vmfile.write("if-goto "+secondLabel+"\n")
-    tokencounter += 2
+    tokencounter += 1
     compileStatements( vmfile, tokenlist, localTokens )
     vmfile.write("goto "+firstLabel+"\n")
     vmfile.write("label "+secondLabel+"\n")
@@ -304,12 +306,14 @@ def compileExpression ( vmfile, tokenlist, localTokens ):
                         functionName += tokenlist[tokencounter]
                     else:
                         functionName = currentclass + '.' + functionName
-                    tokencounter = tokencounter + 1
+                    tokencounter = tokencounter + 2
                     numArgs = compileExpressionList( vmfile, tokenlist, localTokens )
                     vmfile.write('call ' + functionName + ' ' + str(numArgs)+'\n' )
                     if (tokenlist[tokencounter] == ';'):
                         tokencounter += 1
-                        break                
+                        break
+                    if (tokenlist[tokencounter-1] == ';'):
+                        break    
             else:
                 pushcommand = 'push '
                 pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
@@ -320,12 +324,13 @@ def compileExpression ( vmfile, tokenlist, localTokens ):
         elif (tokenType(tokenlist[tokencounter]) == 'stringConstant'):
             compileTerm( vmfile, tokenlist, localTokens)
         elif (tokenlist[tokencounter] == '('):
+            print("lol i dunno")
             #print("entering expression paren")
             tokencounter += 1
             compileExpression( vmfile, tokenlist, localTokens)
-            #tokencounter += 1
+            tokencounter += 1
             #print("exiting expression paren")
-            break
+            #break
         elif tokenlist[tokencounter] == '+':
             tokencounter += 1
             compileTerm(vmfile, tokenlist, localTokens)
@@ -424,19 +429,14 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
     
 def compileExpressionList ( vmfile, tokenlist, localTokens ):
     global tokencounter
-    #decstring = '<expressionList>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     numExpressions = 0
     while tokenlist[tokencounter] != ')':
         numExpressions += 1
         compileExpression( vmfile, tokenlist, localTokens )
         if tokenlist[tokencounter] == ',':
             tokencounter += 1
-            #writeXML(tokenlist[tokencounter], numtabs, vmfile)
     tokencounter += 1
     return numExpressions
-    #decstring = '</expressionList>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     
 def writeXML(mytoken, numtabs, vmfile):
     global tokencounter
