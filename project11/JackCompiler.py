@@ -30,9 +30,9 @@ def initializer ( filepath ):
                         print("Could not open input file: " + filepath)
                         quit()
                     try:
-                        vmfile = open((filepath+inpath).partition('.jack')[0] + '.generated.vm', 'w')
+                        vmfile = open((filepath+inpath).partition('.jack')[0] + '.vm', 'w')
                     except:
-                        print("Could not open output file: " + filepath.partition('.jack')[0] + '.generated.vm')
+                        print("Could not open output file: " + filepath.partition('.jack')[0] + '.vm')
                         quit()
                     parseFile ( jackfile, vmfile )
                     global tokencounter
@@ -49,9 +49,9 @@ def initializer ( filepath ):
             print("Could not open input file: " + filepath)
             quit()
         try:
-            vmfile = open(filepath.partition('.jack')[0] + '.generated.vm', 'w')
+            vmfile = open(filepath.partition('.jack')[0] + '.vm', 'w')
         except:
-            print("Could not open output file: " + filepath.partition('.jack')[0] + '.generated.vm')
+            print("Could not open output file: " + filepath.partition('.jack')[0] + '.vm')
             quit()
         parseFile ( jackfile, vmfile )
         jackfile.close()
@@ -325,6 +325,7 @@ def compileWhile ( vmfile, tokenlist, localTokens ):
     firstLabel = "WHILELOOP"+str(whilecounter)
     whilecounter += 1
     secondLabel = "WHILELOOP"+str(whilecounter)
+    whilecounter += 1
     vmfile.write("label "+firstLabel+"\n")
     tokencounter += 1
     compileExpression( vmfile, tokenlist, localTokens)
@@ -335,7 +336,6 @@ def compileWhile ( vmfile, tokenlist, localTokens ):
     tokencounter += 1
     vmfile.write("goto "+firstLabel+"\n")
     vmfile.write("label "+secondLabel+"\n")
-    whilecounter += 1
     
 def compileReturn ( vmfile, tokenlist, localTokens ):
     global tokencounter
@@ -385,7 +385,7 @@ def compileExpression ( vmfile, tokenlist, localTokens ):
         elif tokenlist[tokencounter] == '-':
             tokencounter += 1
             compileTerm(vmfile, tokenlist, localTokens)
-            if re.match('\+|\-|\=|\/|\(|\*|\,|\||\&',tokenlist[tokencounter-2]) != None:
+            if re.match('\+|\-|\=|\/|\(|\*|\,|\||\&',tokenlist[tokencounter-3]) != None:
                 vmfile.write('neg\n')
             else:
                 vmfile.write('sub\n')
@@ -472,7 +472,10 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
     elif (tokenlist[tokencounter] == '-'):
         tokencounter += 1
         compileTerm(vmfile, tokenlist, localTokens)
-        vmfile.write('neg\n')
+        if re.match('\+|\-|\=|\/|\(|\*|\,|\||\&',tokenlist[tokencounter-3]) != None:
+            vmfile.write('neg\n')
+        else:
+            vmfile.write('sub\n')
     elif (tokenlist[tokencounter] == '~'):
         tokencounter += 1
         compileTerm(vmfile, tokenlist, localTokens)
