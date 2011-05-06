@@ -232,6 +232,7 @@ def compileDo ( vmfile, tokenlist, localTokens ):
         globalmethodcall = 0
         functionName = ''
         func = ''
+        numArgs = 0
         if tokenlist[tokencounter] in localTokens:
             func = tokenlist[tokencounter]
             functionName = localTokens[tokenlist[tokencounter]][0]
@@ -249,7 +250,8 @@ def compileDo ( vmfile, tokenlist, localTokens ):
             functionName += tokenlist[tokencounter]
         else:
             functionName = currentclass + '.' + functionName
-        numArgs = 0
+            vmfile.write("push pointer 0\n")
+            numArgs += 1
         tokencounter = tokencounter + 2
         if (methodcall > 0):
             numArgs += 1
