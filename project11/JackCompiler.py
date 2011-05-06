@@ -286,7 +286,7 @@ def compileLet ( vmfile, tokenlist, localTokens ):
     vmfile.write('pop ' + popLocation + "\n")
     
 def compileIf ( vmfile, tokenlist, localTokens ):
-    global tokencounter, globaltokens, ifcounter
+    global tokencounter, globalTokens, ifcounter
     firstiflabel = "IFLABEL"+str(ifcounter)
     secondiflabel = "IFLABEL"+str(ifcounter+1)
     ifcounter += 2
@@ -307,7 +307,7 @@ def compileIf ( vmfile, tokenlist, localTokens ):
     vmfile.write("label " + secondiflabel + "\n")
     
 def compileWhile ( vmfile, tokenlist, localTokens ):
-    global tokencounter, globaltokens, whilecounter
+    global tokencounter, globalTokens, whilecounter
     firstLabel = "WHILELOOP"+str(whilecounter)
     whilecounter += 1
     secondLabel = "WHILELOOP"+str(whilecounter)
