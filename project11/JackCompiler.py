@@ -221,8 +221,8 @@ def compileLet ( vmfile, tokenlist, localTokens ):
         localTokens[ tokenlist[tokencounter] ] = 'local ' + str(localTokens.size())
         popLocation = localTokens[ tokenlist[tokencounter] ]
     while True:
-        print(tokenlist[tokencounter])
-        print(tokencounter)
+        #print(tokenlist[tokencounter])
+        #print(tokencounter)
         tokencounter = tokencounter + 1
         if tokenlist[tokencounter] == '[':
             tokencounter = tokencounter + 1 #Skip [
@@ -251,9 +251,12 @@ def compileIf ( vmfile, tokenlist, localTokens ):
     compileStatements( vmfile, tokenlist, localTokens )
     vmfile.write("goto " + secondiflabel + "\n")
     vmfile.write("label " + firstiflabel + "\n")
+    tokencounter += 1
+    #print(tokenlist[tokencounter])
     if tokenlist[tokencounter] == 'else':
         tokencounter += 2
         compileStatements( vmfile, tokenlist, localTokens )
+        tokencounter += 1
     vmfile.write("label " + secondiflabel + "\n")
     
 def compileWhile ( vmfile, tokenlist, localTokens ):
@@ -268,6 +271,7 @@ def compileWhile ( vmfile, tokenlist, localTokens ):
     vmfile.write("if-goto "+secondLabel+"\n")
     tokencounter += 1
     compileStatements( vmfile, tokenlist, localTokens )
+    tokencounter += 1
     vmfile.write("goto "+firstLabel+"\n")
     vmfile.write("label "+secondLabel+"\n")
     whilecounter += 1
@@ -280,6 +284,7 @@ def compileReturn ( vmfile, tokenlist, localTokens ):
     else:
         tokencounter += 1
         compileExpression( vmfile, tokenlist, localTokens)
+        tokencounter += 1
     vmfile.write('return\n')
 
     
@@ -291,8 +296,10 @@ def compileExpression ( vmfile, tokenlist, localTokens ):
             tokencounter += 1
         elif tokenlist[tokencounter] == 'false':
             vmfile.write("push constant 0\n")
+            tokencounter += 1
         elif tokenlist[tokencounter] == 'null':
             vmfile.write("push constant 0\n")
+            tokencounter += 1
         elif (tokenlist[tokencounter] == 'this'):
             print("lol I dunno")
         elif (tokenType(tokenlist[tokencounter]) == 'identifier'):
@@ -324,7 +331,7 @@ def compileExpression ( vmfile, tokenlist, localTokens ):
         elif (tokenType(tokenlist[tokencounter]) == 'stringConstant'):
             compileTerm( vmfile, tokenlist, localTokens)
         elif (tokenlist[tokencounter] == '('):
-            print("lol i dunno")
+            #print("lol i dunno")
             #print("entering expression paren")
             tokencounter += 1
             compileExpression( vmfile, tokenlist, localTokens)
