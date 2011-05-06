@@ -111,6 +111,7 @@ def compileClass( vmfile, tokenlist ):
     
 def compileClassVarDec( vmfile, tokenlist ):
     global tokencounter, globalTokens
+    globalTokens = {}
     numfields = 0
     while tokenlist[tokencounter] == 'field':
         tokencounter += 1 #Skip field
@@ -122,7 +123,7 @@ def compileClassVarDec( vmfile, tokenlist ):
             tempstring = varType + ' field ' + str(numfields)
             globalTokens[tokenlist[tokencounter]] = tempstring.split()
             tokencounter += 1
-            numfields += 0
+            numfields += 1
         tokencounter += 1
 
 def compileSubroutine( vmfile, tokenlist ):
@@ -142,7 +143,6 @@ def compileSubroutine( vmfile, tokenlist ):
         compileStatements( vmfile, tokenlist, localTokens )
         tokencounter += 1 # For the }
     elif tokenlist[tokencounter] == 'method':
-        vmfile.write("push argument 0\npop pointer 0\n")
         tokencounter += 1
         returntype = tokenlist[tokencounter]
         tokencounter += 1
@@ -153,6 +153,7 @@ def compileSubroutine( vmfile, tokenlist ):
         tokencounter += 2 # For the {
         numLocals = compileVarDec( vmfile, tokenlist, localTokens )
         vmfile.write('function ' + currentclass + '.' + functionname + ' ' + str(numLocals)+'\n')
+        vmfile.write("push argument 0\npop pointer 0\n")
         compileStatements( vmfile, tokenlist, localTokens )
         tokencounter += 1 # For the }
     else:
@@ -224,16 +225,21 @@ def compileStatements ( vmfile, tokenlist, localTokens ):
             break
 
 def compileDo ( vmfile, tokenlist, localTokens ):
-    global tokencounter, currentclass
+    global tokencounter, currentclass, globalTokens
     while True:
         tokencounter = tokencounter + 1
         methodcall = 0
+        globalmethodcall = 0
         functionName = ''
         func = ''
         if tokenlist[tokencounter] in localTokens:
             func = tokenlist[tokencounter]
             functionName = localTokens[tokenlist[tokencounter]][0]
             methodcall = 1
+        elif tokenlist[tokencounter] in globalTokens:
+            func = tokenlist[tokencounter]
+            functionName = globalTokens[tokenlist[tokencounter]][0]
+            globalmethodcall = 1
         else:
             functionName = tokenlist[tokencounter]
         if tokenlist[tokencounter+1] == '.':
@@ -248,6 +254,9 @@ def compileDo ( vmfile, tokenlist, localTokens ):
         if (methodcall > 0):
             numArgs += 1
             vmfile.write("push " + localTokens[func][1] + " " + localTokens[func][2] + "\n")
+        if (globalmethodcall > 0):
+            numArgs += 1
+            vmfile.write("push this " + globalTokens[func][2] + "\n")
         tempnumArgs = compileExpressionList( vmfile, tokenlist, localTokens )
         numArgs += tempnumArgs
         vmfile.write('call ' + functionName + ' ' + str(numArgs)+'\n' )
@@ -263,7 +272,10 @@ def compileLet ( vmfile, tokenlist, localTokens ):
     if tokenlist[tokencounter] in localTokens:
         popLocation = localTokens[ tokenlist[tokencounter] ][1] + " " + localTokens[ tokenlist[tokencounter] ][2]
     elif tokenlist[tokencounter] in globalTokens:
-        popLocation = globalTokens[ tokenlist[tokencounter] ][1] + " " + globalTokens[ tokenlist[tokencounter] ][2]
+        if globalTokens[tokenlist[tokencounter]][1] == 'field':
+            popLocation += "this" + " " + globalTokens[tokenlist[tokencounter]][2]
+        else:
+            popLocation += globalTokens[tokenlist[tokencounter]][1] + " " + globalTokens[tokenlist[tokencounter]][2]
     else:
         localTokens[ tokenlist[tokencounter] ] = 'local ' + str(localTokens.size())
         popLocation = localTokens[ tokenlist[tokencounter] ]
@@ -429,7 +441,8 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
                 pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
                 vmfile.write(pushcommand)
                 tokencounter += 4 #Skip var.function(
-                numArgs = compileParameterList(vmfile, tokenlist, localTokens) + 1
+                numArgs = compileExpressionList(vmfile, tokenlist, localTokens) + 1
+                vmfile.write('call ' + functionName + ' ' + str(numArgs)+'\n' )
             elif tokenlist[tokencounter] in globalTokens:
                 functionName = globalTokens[tokenlist[tokencounter]][0] + tokenlist[tokencounter+1] + tokenlist[tokencounter+2]
                 pushcommand = 'push '
@@ -439,11 +452,13 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
                     pushcommand += globalTokens[tokenlist[tokencounter]][1] + " " + globalTokens[tokenlist[tokencounter]][2] + "\n"
                 vmfile.write(pushcommand)
                 tokencounter += 4 #Skip var.function(
-                numArgs = compileParameterList(vmfile, tokenlist, localTokens) + 1
+                numArgs = compileExpressionList(vmfile, tokenlist, localTokens) + 1
+                vmfile.write('call ' + functionName + ' ' + str(numArgs)+'\n' )
             else:
                 functionName = tokenlist[tokencounter] + tokenlist[tokencounter+1] + tokenlist[tokencounter+2]
                 tokencounter += 4 #Skip class.function(
-                numArgs = compileParameterList(vmfile, tokenlist, localTokens)
+                numArgs = compileExpressionList(vmfile, tokenlist, localTokens)
+                vmfile.write("call " + functionName + " " + str(numArgs) +"\n")
         else:
             pushcommand = 'push '
             if tokenlist[tokencounter] in localTokens:
