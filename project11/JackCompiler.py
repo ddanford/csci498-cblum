@@ -111,13 +111,8 @@ def compileClass( vmfile, tokenlist ):
     
 def compileClassVarDec( vmfile, tokenlist ):
     global tokencounter, globalTokens
-    #decstring = '<classVarDec>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     while True:
-        #type = tokenType(tokenlist[tokencounter])
-        #tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
         tokencounter = tokencounter + 1
-        #vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
         if (tokenlist[tokencounter-1] == ';'):
             break
     decstring = '</classVarDec>\n'
@@ -146,52 +141,41 @@ def compileSubroutine( vmfile, tokenlist ):
 def compileParameterList( vmfile, tokenlist, localTokens ):
     global tokencounter
     numParams = 0
-    while tokenlist[tokencounter] != ')'
-        
-    # decstring = '<parameterList>\n'
-    # vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
-    # while tokenlist[tokencounter] != ')':
-        # type = tokenType(tokenlist[tokencounter])
-        # tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-        # tokencounter = tokencounter + 1
-        # vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-    # decstring = '</parameterList>\n'
-    # vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
+    while tokenlist[tokencounter] != ')':
+        vartype = tokenlist[tokencounter]
+        tokencounter += 1
+        varname = tokenlist[tokencounter]
+        tokencounter += 1
+        tokenstring = vartype + " argument " + str(numParams)
+        numParams += 1
+        localTokens[varname] = tokenstring.split()
+        if (tokenlist[tokencounter] == ','):
+            tokencounter += 1
     
 def compileVarDec( vmfile, tokenlist, localtokens ):
     global tokencounter
     numLocals = 0
     
-    if tokenlist[tokencounter] == 'var':
+    while tokenlist[tokencounter] == 'var':
         tokencounter += 1 #Skip var
         varType = tokenlist[tokencounter]
         tokencounter += 1
         while tokenlist[tokencounter] != ';':
             if tokenlist[tokencounter] == ',':
                 tokencounter += 1
-            localtokens[tokenlist[tokencounter]] = 'local ' + str(numLocals)
+            tempstring = varType + ' local ' + str(numLocals)
+            localtokens[tokenlist[tokencounter]] = tempstring.split()
             numLocals = int(numLocals) + 1
             tokencounter += 1
-        
-    tokencounter += 1
+        tokencounter += 1
+
     return numLocals
-    # decstring = '<varDec>\n'
-    # vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
-    # while True:
-        # type = tokenType(tokenlist[tokencounter])
-        # tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-        # tokencounter = tokencounter + 1
-        # vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-        # if (tokenlist[tokencounter-1] == ';'):
-            # break
-    # decstring = '</varDec>\n'
-    # vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
 
 def compileStatements ( vmfile, tokenlist, localTokens ):
     global tokencounter, globalTokens
-    #decstring = '<statements>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     while True:
+        #print(tokenlist[tokencounter])
+        #print(tokencounter)
         if (tokenlist[tokencounter] == 'let'):
             compileLet( vmfile, tokenlist, localTokens )
         elif (tokenlist[tokencounter] == 'do'):
@@ -204,16 +188,10 @@ def compileStatements ( vmfile, tokenlist, localTokens ):
             compileReturn( vmfile, tokenlist, localTokens )
         else:
             break
-    #decstring = '</statements>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
 
 def compileDo ( vmfile, tokenlist, localTokens ):
     global tokencounter, currentclass
-    #decstring = '<doStatement>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     while True:
-        #type = tokenType(tokenlist[tokencounter])
-        #tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
         tokencounter = tokencounter + 1
         functionName = tokenlist[tokencounter]
         if tokenlist[tokencounter+1] == '.':
@@ -230,159 +208,124 @@ def compileDo ( vmfile, tokenlist, localTokens ):
             tokencounter += 1
             break
     vmfile.write('pop temp 0\n')
-        #vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-        
-    #decstring = '</doStatement>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     
 def compileLet ( vmfile, tokenlist, localTokens ):
     global tokencounter
-    #decstring = '<letStatement>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     tokencounter += 1 #Skip let
     popLocation = ''
     if tokenlist[tokencounter] in localTokens:
-        popLocation = localTokens[ tokenlist[tokencounter] ]
+        popLocation = localTokens[ tokenlist[tokencounter] ][1] + " " + localTokens[ tokenlist[tokencounter] ][2]
     elif tokenlist[tokencounter] in globalTokens:
-        popLocation = globalTokens[ tokenlist[tokencounter] ]
+        popLocation = globalTokens[ tokenlist[tokencounter] ][1] + " " + globalTokens[ tokenlist[tokencounter] ][2]
     else:
         localTokens[ tokenlist[tokencounter] ] = 'local ' + str(localTokens.size())
         popLocation = localTokens[ tokenlist[tokencounter] ]
     while True:
-        #type = tokenType(tokenlist[tokencounter])
-        #tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
         tokencounter = tokencounter + 1
-        #vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
         if tokenlist[tokencounter] == '[':
-            #type = tokenType(tokenlist[tokencounter])
-            #tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
             tokencounter = tokencounter + 1 #Skip [
-        #    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
             compileExpression( vmfile, tokenlist, localTokens)
-        #    type = tokenType(tokenlist[tokencounter])
-        #    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
             tokencounter = tokencounter + 1 #Skip ]
-        #    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-        if (tokenlist[tokencounter-1] == '='):
+        if (tokenlist[tokencounter] == '='):
+            tokencounter += 1
             compileExpression( vmfile, tokenlist, localTokens )
+        if (tokenlist[tokencounter] == ';'):
+            tokencounter += 1
+            break
         if (tokenlist[tokencounter-1] == ';'):
             break
-    vmfile.write('pop ' + popLocation)
-    #decstring = '</letStatement>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
+    vmfile.write('pop ' + popLocation + "\n")
     
 def compileIf ( vmfile, tokenlist, localTokens ):
-    global tokencounter
-    decstring = '<ifStatement>\n'
-    vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
-
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-
-    compileExpression( vmfile, tokenlist, localTokens )
-
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))	
-
-    compileStatements( vmfile, tokenlist, localTokens)
-
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-    
+    global tokencounter, globaltokens, ifcounter
+    firstiflabel = "IFLABEL"+str(ifcounter)
+    secondiflabel = "IFLABEL"+str(ifcounter+1)
+    ifcounter += 2
+    tokencounter += 1
+    compileExpression( vmfile, tokenlist, localTokens)
+    vmfile.write("not\n")
+    vmfile.write("if-goto " + firstiflabel + "\n")
+    tokencounter += 2
+    compileStatements( vmfile, tokenlist, localTokens )
+    vmfile.write("goto " + secondiflabel + "\n")
+    vmfile.write("label " + firstiflabel + "\n")
     if tokenlist[tokencounter] == 'else':
-        type = tokenType(tokenlist[tokencounter])
-        tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-        tokencounter = tokencounter + 1
-        vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-        type = tokenType(tokenlist[tokencounter])
-        tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-        tokencounter = tokencounter + 1
-        vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-        compileStatements(vmfile, tokenlist, localTokens)
-        type = tokenType(tokenlist[tokencounter])
-        tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-        tokencounter = tokencounter + 1
-        vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-
-    decstring = '</ifStatement>\n'
-    vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
+        tokencounter += 2
+        compileStatements( vmfile, tokenlist, localTokens )
+    vmfile.write("label " + secondiflabel + "\n")
     
 def compileWhile ( vmfile, tokenlist, localTokens ):
-    global tokencounter
-    decstring = '<whileStatement>\n'
-    vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
-    
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-    
-    compileExpression( vmfile, tokenlist, localTokens )
-    
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))	
-
-    compileStatements( vmfile, tokenlist, localTokens)
-
-    type = tokenType(tokenlist[tokencounter])
-    tokenstring = '<'+type+'> '+tokenlist[tokencounter]+' </'+type+'>\n'
-    tokencounter = tokencounter + 1
-    vmfile.write(tokenstring.rjust(len(tokenstring)+numtabs))
-    
-    decstring = '</whileStatement>\n'
-    vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
+    global tokencounter, globaltokens, whilecounter
+    firstLabel = "WHILELOOP"+str(whilecounter)
+    whilecounter += 1
+    secondLabel = "WHILELOOP"+str(whilecounter)
+    vmfile.write("label "+firstLabel+"\n")
+    tokencounter += 1
+    compileExpression( vmfile, tokenlist, localTokens)
+    vmfile.write("not\n")
+    vmfile.write("if-goto "+secondLabel+"\n")
+    tokencounter += 2
+    compileStatements( vmfile, tokenlist, localTokens )
+    vmfile.write("goto "+firstLabel+"\n")
+    vmfile.write("label "+secondLabel+"\n")
+    whilecounter += 1
     
 def compileReturn ( vmfile, tokenlist, localTokens ):
     global tokencounter
-    vmfile.write('push constant 0\n')
+    if tokenlist[tokencounter+1] == ';':
+        vmfile.write('push constant 0\n')
+        tokencounter += 2
+    else:
+        tokencounter += 1
+        compileExpression( vmfile, tokenlist, localTokens)
     vmfile.write('return\n')
-    tokencounter += 2
+
     
 def compileExpression ( vmfile, tokenlist, localTokens ):
-    global tokencounter
-    #decstring = '<expression>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
-    #inparens = False
+    global tokencounter, currentclass
     while True:
-        if (tokenType(tokenlist[tokencounter]) == 'identifier'):
-            compileTerm( vmfile, tokenlist, localTokens)
+        if (tokenlist[tokencounter] == 'true'):
+            vmfile.write("push constant 1\nneg\n")
+            tokencounter += 1
+        elif tokenlist[tokencounter] == 'false':
+            vmfile.write("push constant 0\n")
+        elif tokenlist[tokencounter] == 'null':
+            vmfile.write("push constant 0\n")
+        elif (tokenlist[tokencounter] == 'this'):
+            print("lol I dunno")
+        elif (tokenType(tokenlist[tokencounter]) == 'identifier'):
+            if (tokenlist[tokencounter+1] == '.'):
+                while True:
+                    functionName = tokenlist[tokencounter]
+                    if tokenlist[tokencounter+1] == '.':
+                        tokencounter += 1
+                        functionName += tokenlist[tokencounter]
+                        tokencounter += 1
+                        functionName += tokenlist[tokencounter]
+                    else:
+                        functionName = currentclass + '.' + functionName
+                    tokencounter = tokencounter + 1
+                    numArgs = compileExpressionList( vmfile, tokenlist, localTokens )
+                    vmfile.write('call ' + functionName + ' ' + str(numArgs)+'\n' )
+                    if (tokenlist[tokencounter] == ';'):
+                        tokencounter += 1
+                        break                
+            else:
+                pushcommand = 'push '
+                pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
+                vmfile.write(pushcommand)
+                tokencounter += 1
         elif (tokenType(tokenlist[tokencounter]) == 'integerConstant'):
             compileTerm( vmfile, tokenlist, localTokens)
         elif (tokenType(tokenlist[tokencounter]) == 'stringConstant'):
             compileTerm( vmfile, tokenlist, localTokens)
         elif (tokenlist[tokencounter] == '('):
+            #print("entering expression paren")
             tokencounter += 1
             compileExpression( vmfile, tokenlist, localTokens)
+            #tokencounter += 1
+            #print("exiting expression paren")
             break
-        elif (tokenlist[tokencounter] == 'true' 
-        or tokenlist[tokencounter] == 'false' 
-        or tokenlist[tokencounter] == 'null' 
-        or tokenlist[tokencounter] == 'this'):
-            compileTerm( vmfile, tokenlist, localTokens)
         elif tokenlist[tokencounter] == '+':
             tokencounter += 1
             compileTerm(vmfile, tokenlist, localTokens)
@@ -423,24 +366,23 @@ def compileExpression ( vmfile, tokenlist, localTokens ):
             compileTerm(vmfile, tokenlist, localTokens)
             vmfile.write('eq\n')
             
-            #writeXML(tokenlist[tokencounter], numtabs, vmfile)
-        elif (tokenlist[tokencounter] == '-' or tokenlist[tokencounter] == '~'):
-            compileTerm( vmfile, tokenlist, localTokens)
+        ####SOMETHING WRONG HERE
+        elif (tokenlist[tokencounter] == '~'):
+            #print("why?")
+            tokencounter += 1
+            compileTerm(vmfile, tokenlist, localTokens)
+            vmfile.write('not\n')
         else:
             break
-    #decstring = '</expression>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     
 def compileTerm ( vmfile, tokenlist, localTokens ):
     global tokencounter, globalTokens
-    #decstring = '<term>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     if (tokenlist[tokencounter] == '('):
-        #writeXML(tokenlist[tokencounter], numtabs, vmfile)
+        #print("entering term paren")
         tokencounter += 1
         compileExpression (vmfile, tokenlist, localTokens)
         tokencounter += 1 #Get rid of )
-        #writeXML(tokenlist[tokencounter], numtabs, vmfile)
+        #print("exiting term paren")
     elif (tokenType(tokenlist[tokencounter]) == 'identifier'):
         #writeXML(tokenlist[tokencounter], numtabs, vmfile)
         # if tokenlist[tokencounter] == '.':
@@ -463,6 +405,11 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
             functionName = tokenlist[tokencounter] + tokenlist[tokencounter+1] + tokenlist[tokencounter+2]
             tokencounter += 4 #Skip class.function(
             numArgs = compileParameterList(vmfile, tokenlist, localTokens)
+        else:
+            pushcommand = 'push '
+            pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
+            vmfile.write(pushcommand)
+            tokencounter += 1
     elif (tokenlist[tokencounter] == '-'):
         tokencounter += 1
         compileTerm(vmfile, tokenlist, localTokens)
@@ -474,9 +421,6 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
     else:
         vmfile.write('push constant ' + tokenlist[tokencounter]+"\n")
         tokencounter += 1
-        #writeXML(tokenlist[tokencounter], numtabs, vmfile)
-    #decstring = '</term>\n'
-    #vmfile.write(decstring.rjust(len(decstring)+numtabs-2))
     
 def compileExpressionList ( vmfile, tokenlist, localTokens ):
     global tokencounter
@@ -515,6 +459,8 @@ if len(sys.argv) != 2:
     print('Invalid syntax for JackTokenizer.py. Proper syntax is JackTokenizer.py [filepath | directory]')
     quit()
 
+whilecounter = 0
+ifcounter = 0
 tokencounter = 0
 globaltokens = {}
 currentclass = ''
