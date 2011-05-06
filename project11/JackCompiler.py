@@ -100,7 +100,7 @@ def compileClass( vmfile, tokenlist ):
         else:
             break
     while True:
-        if tokenlist[tokencounter] == 'function' or tokenlist[tokencounter] == 'method':
+        if tokenlist[tokencounter] == 'function' or tokenlist[tokencounter] == 'method' or tokenlist[tokencounter] == 'constructor':
             compileSubroutine( vmfile, tokenlist )
         else:
             break
@@ -134,9 +134,12 @@ def compileSubroutine( vmfile, tokenlist ):
         vmfile.write('function ' + currentclass + '.' + functionname + ' ' + str(numLocals)+'\n')
         compileStatements( vmfile, tokenlist, localTokens )
         tokencounter += 1 # For the }
-    else:
+    elif tokenlist[tokencounter] == 'method':
         # Compile method
         quit()
+    else:
+        quit()
+        
     
 def compileParameterList( vmfile, tokenlist, localTokens ):
     global tokencounter
