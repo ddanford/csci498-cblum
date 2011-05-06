@@ -446,7 +446,10 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
                 numArgs = compileParameterList(vmfile, tokenlist, localTokens)
         else:
             pushcommand = 'push '
-            pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
+            if tokenlist[tokencounter] in localTokens:
+                pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
+            elif tokenlist[tokencounter] in globalTokens:
+                pushcommand += "this " + globalTokens[tokenlist[tokencounter]][2] + "\n"
             vmfile.write(pushcommand)
             tokencounter += 1
     elif (tokenlist[tokencounter] == '-'):
