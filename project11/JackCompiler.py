@@ -111,6 +111,7 @@ def compileClass( vmfile, tokenlist ):
     
 def compileClassVarDec( vmfile, tokenlist ):
     global tokencounter, globalTokens
+    numfields = 0
     while tokenlist[tokencounter] == 'field':
         tokencounter += 1 #Skip field
         varType = tokenlist[tokencounter]
@@ -118,9 +119,10 @@ def compileClassVarDec( vmfile, tokenlist ):
         while tokenlist[tokencounter] != ';':
             if tokenlist[tokencounter] == ',':
                 tokencounter += 1
-            tempstring = varType + ' field ' + str(numLocals)
+            tempstring = varType + ' field ' + str(numfields)
             globalTokens[tokenlist[tokencounter]] = tempstring.split()
             tokencounter += 1
+            numfields += 0
         tokencounter += 1
 
 def compileSubroutine( vmfile, tokenlist ):
@@ -494,7 +496,7 @@ if len(sys.argv) != 2:
 whilecounter = 0
 ifcounter = 0
 tokencounter = 0
-globaltokens = {}
+globalTokens = {}
 currentclass = ''
 filepath = sys.argv[1]
 initializer (filepath)
