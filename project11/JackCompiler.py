@@ -193,7 +193,15 @@ def compileDo ( vmfile, tokenlist, localTokens ):
     global tokencounter, currentclass
     while True:
         tokencounter = tokencounter + 1
-        functionName = tokenlist[tokencounter]
+        methodcall = 0
+        functionName = ''
+        func = ''
+        if tokenlist[tokencounter] in localTokens:
+            func = tokenlist[tokencounter]
+            functionName = localTokens[tokenlist[tokencounter]][0]
+            methodcall = 1
+        else:
+            functionName = tokenlist[tokencounter]
         if tokenlist[tokencounter+1] == '.':
             tokencounter += 1
             functionName += tokenlist[tokencounter]
@@ -201,8 +209,13 @@ def compileDo ( vmfile, tokenlist, localTokens ):
             functionName += tokenlist[tokencounter]
         else:
             functionName = currentclass + '.' + functionName
+        numArgs = 0
         tokencounter = tokencounter + 2
-        numArgs = compileExpressionList( vmfile, tokenlist, localTokens )
+        if (methodcall > 0):
+            numArgs += 1
+            vmfile.write("push " + localTokens[func][1] + " " + localTokens[func][2] + "\n")
+        tempnumArgs = compileExpressionList( vmfile, tokenlist, localTokens )
+        numArgs += tempnumArgs
         vmfile.write('call ' + functionName + ' ' + str(numArgs)+'\n' )
         if (tokenlist[tokencounter] == ';' or tokenlist[tokencounter-1] == ';'):
             tokencounter += 1
