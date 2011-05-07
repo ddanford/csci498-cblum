@@ -135,7 +135,7 @@ def compileClassVarDec( vmfile, tokenlist ):
                 tempstring = varType + ' static ' + str(numfields)
                 globalTokens[tokenlist[tokencounter]] = tempstring.split()
                 tokencounter += 1
-                numfields += 1
+                #numfields += 1
         tokencounter += 1
 
 def compileSubroutine( vmfile, tokenlist ):
@@ -180,14 +180,16 @@ def compileSubroutine( vmfile, tokenlist ):
         tokencounter += 2 # For the {
         numLocals = compileVarDec( vmfile, tokenlist, localTokens )
         vmfile.write('function ' + currentclass + '.' + functionname + ' ' + str(numLocals)+'\n')
-        classsize = len(globalTokens)
+        classsize = 0
+        for i in globalTokens:
+            if globalTokens[i][1] == 'field':
+                classsize += 1
         vmfile.write('push constant '+str(classsize)+'\ncall Memory.alloc 1\npop pointer 0\n')
         compileStatements( vmfile, tokenlist, localTokens )
         tokencounter += 1 # For the }
     
 def compileParameterList( vmfile, tokenlist, localTokens, numParams ):
     global tokencounter
-    #numParams = 0
     while tokenlist[tokencounter] != ')':
         vartype = tokenlist[tokencounter]
         tokencounter += 1
