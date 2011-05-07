@@ -271,6 +271,7 @@ def compileLet ( vmfile, tokenlist, localTokens ):
     global tokencounter
     tokencounter += 1 #Skip let
     popLocation = ''
+    arraywrite = 0
     if tokenlist[tokencounter] in localTokens:
         popLocation = localTokens[ tokenlist[tokencounter] ][1] + " " + localTokens[ tokenlist[tokencounter] ][2]
     elif tokenlist[tokencounter] in globalTokens:
@@ -289,6 +290,8 @@ def compileLet ( vmfile, tokenlist, localTokens ):
             tokencounter = tokencounter + 1 #Skip [
             compileExpression( vmfile, tokenlist, localTokens)
             tokencounter = tokencounter + 1 #Skip ]
+            vmfile.write("push " +popLocation + "\nadd\n")
+            arraywrite = 1
         if (tokenlist[tokencounter] == '='):
             tokencounter += 1
             compileExpression( vmfile, tokenlist, localTokens )
@@ -297,7 +300,10 @@ def compileLet ( vmfile, tokenlist, localTokens ):
             break
         if (tokenlist[tokencounter-1] == ';'):
             break
-    vmfile.write('pop ' + popLocation + "\n")
+    if (arraywrite):
+        vmfile.write("pop temp 0\npop pointer 1\npush temp 0\npop that 0\n")
+    else:
+        vmfile.write('pop ' + popLocation + "\n")
     
 def compileIf ( vmfile, tokenlist, localTokens ):
     global tokencounter, globalTokens, ifcounter
@@ -418,9 +424,7 @@ def compileExpression ( vmfile, tokenlist, localTokens ):
             compileTerm(vmfile, tokenlist, localTokens)
             vmfile.write('eq\n')
             
-        ####SOMETHING WRONG HERE
         elif (tokenlist[tokencounter] == '~'):
-            #print("why?")
             tokencounter += 1
             compileTerm(vmfile, tokenlist, localTokens)
             vmfile.write('not\n')
@@ -435,6 +439,13 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
         compileExpression (vmfile, tokenlist, localTokens)
         tokencounter += 1 #Get rid of )
         #print("exiting term paren")
+    elif (tokenType(tokenlist[tokencounter]) == 'stringConstant'):
+        tempstring = tokenlist[tokencounter][1:len(tokenlist[tokencounter])-1]
+        stringLen = len(tempstring)
+        vmfile.write("push constant "+ str(stringLen)+"\ncall String.new 1\n")
+        for i in tempstring:
+            vmfile.write("push constant "+str(ord(i))+"\ncall String.appendChar 2\n")
+        tokencounter += 1
     elif (tokenType(tokenlist[tokencounter]) == 'identifier'):
         if tokenlist[tokencounter+1] == '.':
             if tokenlist[tokencounter] in localTokens:
@@ -461,13 +472,34 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
                 tokencounter += 4 #Skip class.function(
                 numArgs = compileExpressionList(vmfile, tokenlist, localTokens)
                 vmfile.write("call " + functionName + " " + str(numArgs) +"\n")
+        if tokenlist[tokencounter+1] == '[':
+            if tokenlist[tokencounter] in localTokens:
+                pushcommand = 'push '
+                pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
+                vmfile.write(pushcommand)
+                tokencounter += 2 #Skip [
+                compileExpression(vmfile, tokenlist, localTokens)
+                vmfile.write('add\npop pointer 1\npush that 0\n')
+                tokencounter += 1 #move past ]
+            elif tokenlist[tokencounter] in globalTokens:
+                pushcommand = 'push '
+                if globalTokens[tokenlist[tokencounter]][1] == 'field':
+                    pushcommand += "this" + " " + globalTokens[tokenlist[tokencounter]][2] + "\n"
+                else:
+                    pushcommand += globalTokens[tokenlist[tokencounter]][1] + " " + globalTokens[tokenlist[tokencounter]][2] + "\n"
+                vmfile.write(pushcommand)
+                tokencounter += 2 #Skip [
+                compileExpression(vmfile, tokenlist, localTokens)
+                vmfile.write('add\npop pointer 1\npush that 0\n')
+                tokencounter += 1 #move past ]
         else:
             pushcommand = 'push '
             if tokenlist[tokencounter] in localTokens:
                 pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
+                vmfile.write(pushcommand)
             elif tokenlist[tokencounter] in globalTokens:
                 pushcommand += "this " + globalTokens[tokenlist[tokencounter]][2] + "\n"
-            vmfile.write(pushcommand)
+                vmfile.write(pushcommand)
             tokencounter += 1
     elif (tokenlist[tokencounter] == '-'):
         tokencounter += 1
