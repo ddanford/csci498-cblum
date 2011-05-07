@@ -113,17 +113,29 @@ def compileClassVarDec( vmfile, tokenlist ):
     global tokencounter, globalTokens
     globalTokens = {}
     numfields = 0
-    while tokenlist[tokencounter] == 'field':
-        tokencounter += 1 #Skip field
-        varType = tokenlist[tokencounter]
-        tokencounter += 1
-        while tokenlist[tokencounter] != ';':
-            if tokenlist[tokencounter] == ',':
-                tokencounter += 1
-            tempstring = varType + ' field ' + str(numfields)
-            globalTokens[tokenlist[tokencounter]] = tempstring.split()
+    while tokenlist[tokencounter] == 'field' or tokenlist[tokencounter] == 'static':
+        if tokenlist[tokencounter] == 'field'"
+            tokencounter += 1 #Skip field
+            varType = tokenlist[tokencounter]
             tokencounter += 1
-            numfields += 1
+            while tokenlist[tokencounter] != ';':
+                if tokenlist[tokencounter] == ',':
+                    tokencounter += 1
+                tempstring = varType + ' field ' + str(numfields)
+                globalTokens[tokenlist[tokencounter]] = tempstring.split()
+                tokencounter += 1
+                numfields += 1
+        if tokenlist[tokencounter] == 'static'"
+            tokencounter += 1 #Skip field
+            varType = tokenlist[tokencounter]
+            tokencounter += 1
+            while tokenlist[tokencounter] != ';':
+                if tokenlist[tokencounter] == ',':
+                    tokencounter += 1
+                tempstring = varType + ' static ' + str(numfields)
+                globalTokens[tokenlist[tokencounter]] = tempstring.split()
+                tokencounter += 1
+                numfields += 1
         tokencounter += 1
 
 def compileSubroutine( vmfile, tokenlist ):
