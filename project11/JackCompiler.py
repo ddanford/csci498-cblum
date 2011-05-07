@@ -300,8 +300,6 @@ def compileLet ( vmfile, tokenlist, localTokens ):
         localTokens[ tokenlist[tokencounter] ] = 'local ' + str(localTokens.size())
         popLocation = localTokens[ tokenlist[tokencounter] ]
     while True:
-        #print(tokenlist[tokencounter])
-        #print(tokencounter)
         tokencounter = tokencounter + 1
         if tokenlist[tokencounter] == '[':
             tokencounter = tokencounter + 1 #Skip [
