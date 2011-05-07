@@ -114,7 +114,7 @@ def compileClassVarDec( vmfile, tokenlist ):
     globalTokens = {}
     numfields = 0
     while tokenlist[tokencounter] == 'field' or tokenlist[tokencounter] == 'static':
-        if tokenlist[tokencounter] == 'field'"
+        if tokenlist[tokencounter] == 'field':
             tokencounter += 1 #Skip field
             varType = tokenlist[tokencounter]
             tokencounter += 1
@@ -125,7 +125,7 @@ def compileClassVarDec( vmfile, tokenlist ):
                 globalTokens[tokenlist[tokencounter]] = tempstring.split()
                 tokencounter += 1
                 numfields += 1
-        if tokenlist[tokencounter] == 'static'"
+        if tokenlist[tokencounter] == 'static':
             tokencounter += 1 #Skip field
             varType = tokenlist[tokencounter]
             tokencounter += 1
@@ -148,7 +148,7 @@ def compileSubroutine( vmfile, tokenlist ):
         functionname = tokenlist[tokencounter]
         tokencounter += 2
         localTokens = {}
-        compileParameterList( vmfile, tokenlist, localTokens )
+        compileParameterList( vmfile, tokenlist, localTokens, 0 )
         tokencounter += 2 # For the {
         numLocals = compileVarDec( vmfile, tokenlist, localTokens )
         vmfile.write('function ' + currentclass + '.' + functionname + ' ' + str(numLocals)+'\n')
@@ -161,7 +161,7 @@ def compileSubroutine( vmfile, tokenlist ):
         functionname = tokenlist[tokencounter]
         tokencounter += 2
         localTokens = {}
-        compileParameterList( vmfile, tokenlist, localTokens )
+        compileParameterList( vmfile, tokenlist, localTokens, 1 )
         tokencounter += 2 # For the {
         numLocals = compileVarDec( vmfile, tokenlist, localTokens )
         vmfile.write('function ' + currentclass + '.' + functionname + ' ' + str(numLocals)+'\n')
@@ -176,7 +176,7 @@ def compileSubroutine( vmfile, tokenlist ):
         functionname = tokenlist[tokencounter]
         tokencounter += 2
         localTokens = {}
-        compileParameterList( vmfile, tokenlist, localTokens )
+        compileParameterList( vmfile, tokenlist, localTokens, 0 )
         tokencounter += 2 # For the {
         numLocals = compileVarDec( vmfile, tokenlist, localTokens )
         vmfile.write('function ' + currentclass + '.' + functionname + ' ' + str(numLocals)+'\n')
@@ -185,9 +185,9 @@ def compileSubroutine( vmfile, tokenlist ):
         compileStatements( vmfile, tokenlist, localTokens )
         tokencounter += 1 # For the }
     
-def compileParameterList( vmfile, tokenlist, localTokens ):
+def compileParameterList( vmfile, tokenlist, localTokens, numParams ):
     global tokencounter
-    numParams = 0
+    #numParams = 0
     while tokenlist[tokencounter] != ')':
         vartype = tokenlist[tokencounter]
         tokencounter += 1
