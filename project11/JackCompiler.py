@@ -272,7 +272,10 @@ def compileDo ( vmfile, tokenlist, localTokens ):
             vmfile.write("push " + localTokens[func][1] + " " + localTokens[func][2] + "\n")
         if (globalmethodcall > 0):
             numArgs += 1
-            vmfile.write("push this " + globalTokens[func][2] + "\n")
+            if globalTokens[func][1] == 'field':
+                vmfile.write("push this " + globalTokens[func][2] + "\n")
+            else:
+                vmfile.write("push static " + globalTokens[func][2] + "\n")
         tempnumArgs = compileExpressionList( vmfile, tokenlist, localTokens )
         numArgs += tempnumArgs
         vmfile.write('call ' + functionName + ' ' + str(numArgs)+'\n' )
@@ -512,7 +515,10 @@ def compileTerm ( vmfile, tokenlist, localTokens ):
                 pushcommand += localTokens[tokenlist[tokencounter]][1] + " " + localTokens[tokenlist[tokencounter]][2] + "\n"
                 vmfile.write(pushcommand)
             elif tokenlist[tokencounter] in globalTokens:
-                pushcommand += "this " + globalTokens[tokenlist[tokencounter]][2] + "\n"
+                if globalTokens[tokenlist[tokencounter]][1] == 'field':
+                    pushcommand += "this " + globalTokens[tokenlist[tokencounter]][2] + "\n"
+                else:
+                    pushcommand += "static " + globalTokens[tokenlist[tokencounter]][2] + "\n"
                 vmfile.write(pushcommand)
             tokencounter += 1
     elif (tokenlist[tokencounter] == '-'):
