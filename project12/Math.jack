@@ -57,6 +57,7 @@ class Math {
     }
 
     /** Returns the integer part of the square root of x. */
+    //Currently doesn't work properly with the test of sqrt(32767)
     function int sqrt(int x) {
         var int y, j;
         let y = 0;
