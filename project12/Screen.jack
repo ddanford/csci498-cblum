@@ -8,21 +8,49 @@
  */
 class Screen {
 
+    field boolean color;
+    field Array theScreen;
+
     /** Initializes the Screen. */
     function void init() {
+        let color = true;
+        let theScreen = 16384;
     }
 
     /** Erases the whole screen. */
     function void clearScreen() {
+        var int counter;
+        let counter = 0;
+        while (counter < 8192) {
+            let theScreen[counter] = 0;
+            let counter = counter + 1;
+        }
+        return;
     }
 
     /** Sets the color to be used in further draw commands
      *  where white = false, black = true. */
     function void setColor(boolean b) {
+        let color = b;
     }
 
     /** Draws the (x, y) pixel. */
     function void drawPixel(int x, int y) {
+        var int counter, xmod16;
+        if ( (x < 0) | (x > 511) | (y < 0) | (y > 255) ) {
+            Sys.error(7);
+        }
+        else {
+            let counter = x / 16;
+            let xmod16 = x - ( counter * 16 );
+            let counter = counter + ( y * 32 );
+            if (color) {
+                
+            }
+            else {
+            
+            }
+        }
     }
 
     /** Draws a line from pixel (x1, y1) to (x2, y2). */
