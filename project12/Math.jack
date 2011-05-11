@@ -10,6 +10,7 @@ class Math {
 
     /** Initializes the library. */
     function void init() {
+        return;
     }
 
     /** Returns the absolute value of x. */
@@ -26,12 +27,12 @@ class Math {
         let result = 0;
         let negate = 0;
         if ( y < 0 ) {
-            let y = abs(y);
+            let y = Math.abs(y);
             let negate = 1;
         }
         while ( y > 0 ) {
             let result = result + x;
-            y = y - 1;
+            let y = y - 1;
         }
         if (negate = 1) {
             return -result;
@@ -43,30 +44,47 @@ class Math {
 
     /** Returns the integer part of x/y. */
     function int divide(int x, int y) {
-        var int q;
-        if (y > x) {
-            return 0;
+        var int result, negatex, negatey;
+        let result = 0;
+        let negatex = 0;
+        let negatey = 0;
+        if ( y = 1 ) {
+            return x;
         }
-        let q = divide(x, (2*y));
-        if ((x-(2*q*y)) < y) {
-            return (2*q);
+        if ( x < 0 ) {
+            let x = Math.abs(x);
+            let negatex = 1;
         }
-        else {
-            return ((2*q)+1)
+        if ( y < 0 ) {
+            let y = Math.abs(y);
+            let negatey = 1;
         }
+        while ( (x > y) | (x = y) ) {
+            let x = x - y;
+            let result = result + 1;
+        }
+        if ( (negatex = 1) & (negatey = 1) ) {
+            return result;
+        }
+        if ( (negatex = 1) | (negatey = 1) ) {
+            return -result;
+        }
+        return result;
     }
 
     /** Returns the integer part of the square root of x. */
-    //Currently doesn't work properly with the test of sqrt(32767)
+    // Currently doesn't work with sqrt(32767) for some reason.
     function int sqrt(int x) {
-        var int y, j;
-        let y = 0;
-        while ( true ) {
-            if ( multiply(y, y) > x ) {
-                return (y - 1);
-            }
-            y = y + 1;
+        var int oldguess, guess;
+
+        let oldguess = -1;
+        let guess = 1;
+        while (Math.abs(guess-oldguess) > 1) {
+            let oldguess = guess; 
+            //let guess = (Math.divide((guess + Math.divide(x, guess)), 2));
+            let guess = ((guess + ( x / guess ) ) / 2);
         }
+        return guess;
     }
 
     /** Returns the greater number. */
