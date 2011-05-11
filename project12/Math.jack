@@ -73,16 +73,20 @@ class Math {
     }
 
     /** Returns the integer part of the square root of x. */
-    // Currently doesn't work with sqrt(32767) for some reason.
     function int sqrt(int x) {
-        var int oldguess, guess;
-
+        var int oldguess, guess, counter;
+        let counter = 0;
         let oldguess = -1;
         let guess = 1;
-        while (Math.abs(guess-oldguess) > 1) {
-            let oldguess = guess; 
-            //let guess = (Math.divide((guess + Math.divide(x, guess)), 2));
+        //Total hack around overflow
+        if ( x = 32767 ) {
+            let x = x - 1;
+        }
+        //Babylonian method of square root
+        while ((Math.abs(guess-oldguess) > 1)) {
+            let oldguess = guess;
             let guess = ((guess + ( x / guess ) ) / 2);
+            let counter = counter + 1;
         }
         return guess;
     }
