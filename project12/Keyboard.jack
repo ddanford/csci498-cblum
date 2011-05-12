@@ -10,6 +10,7 @@ class Keyboard {
 
     /** Initializes the keyboard. */
     function void init() {
+        return;
     } 
 
     /**
@@ -33,6 +34,7 @@ class Keyboard {
      * F1 - F12 = 141 - 152
      */
     function char keyPressed() {
+        return Memory.peek(24576);
     }
 
     /**								
@@ -41,6 +43,19 @@ class Keyboard {
      * the key to the screen, and returns the value of the pressed key.
      */
     function char readChar() {
+        var char local0, local1;
+        do Output.printChar(0);
+        while( (local1 = 0) | (local0 > 0)){
+            let local0 = Keyboard.keyPressed();
+            if( local0 > 0){
+                let local1 = local0;
+            }
+        }
+        
+        do Output.printChar( String.backSpace() );
+        do Output.printChar( local1 );
+        
+        return local1;
     }
 
     /**								
@@ -48,6 +63,30 @@ class Keyboard {
      * (until a newline character) from the keyboard and returns its value.
      */
     function String readLine(String message) {
+        var char next, enter, back;
+        var String line;
+        var boolean done;
+        let line = String.new(80);
+        do Output.printString(message);
+        let enter = String.newLine();
+        let back = String.backSpace();
+        
+        while(~done){
+            let next = Keyboard.readChar();
+            if(next = enter){
+                let done = ~0;
+            }
+            else{
+                if( next = back ){
+                    do line.eraseLastChar();
+                }
+                else{
+                    let line = line.appendChar(next);
+                }
+            }
+        }
+        
+        return line;
     }   
 
     /**								
@@ -56,5 +95,11 @@ class Keyboard {
      * integer value (until the first non numeric character).
      */
     function int readInt(String message) {
+        var String line;
+        var int value;
+        let line = Keyboard.readLine(message);
+        let value = line.intValue();
+        do line.dispose();
+        return value;
     }
 }
