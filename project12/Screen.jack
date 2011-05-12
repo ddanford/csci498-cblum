@@ -45,12 +45,108 @@ class Screen {
             let xmod16 = x - ( counter * 16 );
             let counter = counter + ( y * 32 );
             if (color) {
+                if ( xmod16 = 0 ) {
+                    theScreen[counter] = theScreen[counter] | -32768;
+                }
+                if ( xmod16 = 1 ) {
+                    theScreen[counter] = theScreen[counter] | 16384;
+                }
+                if ( xmod16 = 2 ) {
+                    theScreen[counter] = theScreen[counter] | 8192;
+                }
+                if ( xmod16 = 3 ) {
+                    theScreen[counter] = theScreen[counter] | 4096;
+                }
+                if ( xmod16 = 4 ) {
+                    theScreen[counter] = theScreen[counter] | 2048;
+                }
+                if ( xmod16 = 5 ) {
+                    theScreen[counter] = theScreen[counter] | 1024;
+                }
+                if ( xmod16 = 6 ) {
+                    theScreen[counter] = theScreen[counter] | 512;
+                }
+                if ( xmod16 = 7 ) {
+                    theScreen[counter] = theScreen[counter] | 256;
+                }
+                if ( xmod16 = 8 ) {
+                    theScreen[counter] = theScreen[counter] | 128;
+                }
+                if ( xmod16 = 9 ) {
+                    theScreen[counter] = theScreen[counter] | 64;
+                }
+                if ( xmod16 = 10 ) {
+                    theScreen[counter] = theScreen[counter] | 32;
+                }
+                if ( xmod16 = 11 ) {
+                    theScreen[counter] = theScreen[counter] | 16;
+                }
+                if ( xmod16 = 12 ) {
+                    theScreen[counter] = theScreen[counter] | 8;
+                }
+                if ( xmod16 = 13 ) {
+                    theScreen[counter] = theScreen[counter] | 4;
+                }
+                if ( xmod16 = 14 ) {
+                    theScreen[counter] = theScreen[counter] | 2;
+                }
+                if ( xmod16 = 15 ) {
+                    theScreen[counter] = theScreen[counter] | 1;
+                }
                 
             }
             else {
-            
+                if ( xmod16 = 0 ) {
+                    theScreen[counter] = theScreen[counter] & (16384);
+                }
+                if ( xmod16 = 1 ) {
+                    theScreen[counter] = theScreen[counter] & (-16385);
+                }
+                if ( xmod16 = 2 ) {
+                    theScreen[counter] = theScreen[counter] & (-8193);
+                }
+                if ( xmod16 = 3 ) {
+                    theScreen[counter] = theScreen[counter] & (-4097);
+                }
+                if ( xmod16 = 4 ) {
+                    theScreen[counter] = theScreen[counter] & (-2049);
+                }
+                if ( xmod16 = 5 ) {
+                    theScreen[counter] = theScreen[counter] & (-1025);
+                }
+                if ( xmod16 = 6 ) {
+                    theScreen[counter] = theScreen[counter] & (-513);
+                }
+                if ( xmod16 = 7 ) {
+                    theScreen[counter] = theScreen[counter] & (-257);
+                }
+                if ( xmod16 = 8 ) {
+                    theScreen[counter] = theScreen[counter] & (-129);
+                }
+                if ( xmod16 = 9 ) {
+                    theScreen[counter] = theScreen[counter] & (-65);
+                }
+                if ( xmod16 = 10 ) {
+                    theScreen[counter] = theScreen[counter] & (-33);
+                }
+                if ( xmod16 = 11 ) {
+                    theScreen[counter] = theScreen[counter] & (-17);
+                }
+                if ( xmod16 = 12 ) {
+                    theScreen[counter] = theScreen[counter] & (-9);
+                }
+                if ( xmod16 = 13 ) {
+                    theScreen[counter] = theScreen[counter] & (-5);
+                }
+                if ( xmod16 = 14 ) {
+                    theScreen[counter] = theScreen[counter] & (-3);
+                }
+                if ( xmod16 = 15 ) {
+                    theScreen[counter] = theScreen[counter] & (-2);
+                }
             }
         }
+        return;
     }
 
     /** Draws a line from pixel (x1, y1) to (x2, y2). */
